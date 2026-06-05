@@ -15,3 +15,5 @@ def test_cli_app_can_show_help():
     result = runner.invoke(app, ["--help"])
 
     assert result.exit_code == 0
+    assert "Usage:" in result.output
+    assert "Mine repositories for maintenance and evolution signals." in result.output
