@@ -17,3 +17,9 @@ def test_cli_app_can_show_help():
     assert result.exit_code == 0
     assert "Usage:" in result.output
     assert "Mine repositories for maintenance and evolution signals." in result.output
+
+
+def test_info_command_exists():
+    result = runner.invoke(app, ["info"])
+
+    assert result.exit_code == 0
