@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import typer
 
 
@@ -10,5 +12,5 @@ def main():
 
 
 @app.command()
-def info():
+def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect.")):
     """Show repository information."""

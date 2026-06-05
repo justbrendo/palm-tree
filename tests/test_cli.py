@@ -23,3 +23,16 @@ def test_info_command_exists():
     result = runner.invoke(app, ["info"])
 
     assert result.exit_code == 0
+
+
+def test_info_command_has_repo_option():
+    result = runner.invoke(app, ["info", "--help"])
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_info_command_accepts_repo_option(tmp_path):
+    result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
