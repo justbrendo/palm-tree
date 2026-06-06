@@ -50,6 +50,21 @@ def count_touched_files(touched_files: list[str]) -> dict[str, int]:
     return dict(Counter(touched_files))
 
 
+def aggregate_churn(
+    entries: list[dict[str, int | str]],
+) -> dict[str, dict[str, int]]:
+    churn_by_path = {}
+    for entry in entries:
+        path = str(entry["path"])
+        added = int(entry["added"])
+        deleted = int(entry["deleted"])
+        churn_by_path.setdefault(path, {"added": 0, "deleted": 0, "churn": 0})
+        churn_by_path[path]["added"] += added
+        churn_by_path[path]["deleted"] += deleted
+        churn_by_path[path]["churn"] += added + deleted
+    return churn_by_path
+
+
 def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
     return [
         {"path": path, "touches": touches}

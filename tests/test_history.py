@@ -1,6 +1,7 @@
 import subprocess
 
 from palm_tree.history import (
+    aggregate_churn,
     count_touched_files,
     find_hotspots,
     list_numstat_entries,
@@ -90,6 +91,19 @@ def test_list_numstat_entries_runs_git_log(monkeypatch, tmp_path):
             "text": True,
         }
     ]
+
+
+def test_aggregate_churn_sums_lines_by_path():
+    entries = [
+        {"path": "README.md", "added": 10, "deleted": 2},
+        {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4},
+        {"path": "README.md", "added": 3, "deleted": 1},
+    ]
+
+    assert aggregate_churn(entries) == {
+        "README.md": {"added": 13, "deleted": 3, "churn": 16},
+        "src/palm_tree/cli.py": {"added": 0, "deleted": 4, "churn": 4},
+    }
 
 
 def test_count_touched_files_counts_each_path():
