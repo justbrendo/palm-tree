@@ -1,6 +1,6 @@
 import subprocess
 
-from palm_tree.history import list_touched_files, parse_touched_files
+from palm_tree.history import count_touched_files, list_touched_files, parse_touched_files
 
 
 def test_parse_touched_files_from_git_output():
@@ -42,3 +42,12 @@ def test_list_touched_files_runs_git_log(monkeypatch, tmp_path):
             "text": True,
         }
     ]
+
+
+def test_count_touched_files_counts_each_path():
+    touched_files = ["README.md", "src/palm_tree/cli.py", "README.md"]
+
+    assert count_touched_files(touched_files) == {
+        "README.md": 2,
+        "src/palm_tree/cli.py": 1,
+    }

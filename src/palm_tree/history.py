@@ -1,4 +1,5 @@
 import subprocess
+from collections import Counter
 from pathlib import Path
 
 
@@ -21,3 +22,7 @@ def list_touched_files(repo: Path) -> list[str]:
         text=True,
     )
     return parse_touched_files(result.stdout)
+
+
+def count_touched_files(touched_files: list[str]) -> dict[str, int]:
+    return dict(Counter(touched_files))
