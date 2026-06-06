@@ -21,3 +21,8 @@ def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to
         raise typer.Exit(code=1)
 
     typer.echo("Git repository: yes")
+
+
+@app.command()
+def hotspots():
+    """Show files with the most repository churn."""

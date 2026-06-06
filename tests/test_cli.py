@@ -54,3 +54,9 @@ def test_info_command_rejects_non_git_directory(tmp_path):
 
     assert result.exit_code == 1
     assert "not a git repository" in result.output
+
+
+def test_hotspots_command_exists():
+    result = runner.invoke(app, ["hotspots"])
+
+    assert result.exit_code == 0
