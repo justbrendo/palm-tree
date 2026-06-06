@@ -24,5 +24,10 @@ def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to
 
 
 @app.command()
-def hotspots():
+def hotspots(
+    repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
+):
     """Show files with the most repository churn."""
+    if not is_git_repository(repo):
+        typer.echo(f"Error: {repo} is not a git repository.", err=True)
+        raise typer.Exit(code=1)

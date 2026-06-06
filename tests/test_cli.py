@@ -60,3 +60,25 @@ def test_hotspots_command_exists():
     result = runner.invoke(app, ["hotspots"])
 
     assert result.exit_code == 0
+
+
+def test_hotspots_command_has_repo_option():
+    result = runner.invoke(app, ["hotspots", "--help"])
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_hotspots_command_accepts_repo_option(tmp_path):
+    (tmp_path / ".git").mkdir()
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+
+
+def test_hotspots_command_rejects_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
