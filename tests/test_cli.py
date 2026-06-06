@@ -69,6 +69,13 @@ def test_hotspots_command_has_repo_option():
     assert "--repo" in result.output
 
 
+def test_hotspots_command_has_limit_option():
+    result = runner.invoke(app, ["hotspots", "--help"])
+
+    assert result.exit_code == 0
+    assert "--limit" in result.output
+
+
 def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
     monkeypatch.setattr("palm_tree.cli.find_hotspots", lambda repo: [])
@@ -100,3 +107,22 @@ def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
     assert result.exit_code == 0
     assert "3\tREADME.md" in result.output
     assert "1\tsrc/palm_tree/cli.py" in result.output
+
+
+def test_hotspots_command_limits_output(monkeypatch, tmp_path):
+    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr(
+        "palm_tree.cli.find_hotspots",
+        lambda repo: [
+            {"path": "README.md", "touches": 3},
+            {"path": "tests/test_cli.py", "touches": 2},
+            {"path": "src/palm_tree/cli.py", "touches": 1},
+        ],
+    )
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path), "--limit", "2"])
+
+    assert result.exit_code == 0
+    assert "3\tREADME.md" in result.output
+    assert "2\ttests/test_cli.py" in result.output
+    assert "1\tsrc/palm_tree/cli.py" not in result.output
