@@ -8,6 +8,7 @@ from palm_tree.history import (
     list_touched_files,
     parse_numstat_entries,
     parse_touched_files,
+    rank_churn,
     rank_hotspots,
 )
 
@@ -104,6 +105,20 @@ def test_aggregate_churn_sums_lines_by_path():
         "README.md": {"added": 13, "deleted": 3, "churn": 16},
         "src/palm_tree/cli.py": {"added": 0, "deleted": 4, "churn": 4},
     }
+
+
+def test_rank_churn_orders_files_by_total_churn():
+    churn_by_path = {
+        "src/palm_tree/cli.py": {"added": 0, "deleted": 4, "churn": 4},
+        "README.md": {"added": 13, "deleted": 3, "churn": 16},
+        "tests/test_cli.py": {"added": 8, "deleted": 2, "churn": 10},
+    }
+
+    assert rank_churn(churn_by_path) == [
+        {"path": "README.md", "added": 13, "deleted": 3, "churn": 16},
+        {"path": "tests/test_cli.py", "added": 8, "deleted": 2, "churn": 10},
+        {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
+    ]
 
 
 def test_count_touched_files_counts_each_path():

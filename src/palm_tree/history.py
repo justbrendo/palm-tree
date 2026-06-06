@@ -65,6 +65,22 @@ def aggregate_churn(
     return churn_by_path
 
 
+def rank_churn(
+    churn_by_path: dict[str, dict[str, int]],
+) -> list[dict[str, int | str]]:
+    return [
+        {
+            "path": path,
+            "added": totals["added"],
+            "deleted": totals["deleted"],
+            "churn": totals["churn"],
+        }
+        for path, totals in sorted(
+            churn_by_path.items(), key=lambda item: (-item[1]["churn"], item[0])
+        )
+    ]
+
+
 def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
     return [
         {"path": path, "touches": touches}
