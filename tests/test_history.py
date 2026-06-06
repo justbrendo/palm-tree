@@ -3,6 +3,7 @@ import subprocess
 from palm_tree.history import (
     count_touched_files,
     find_hotspots,
+    list_numstat_entries,
     list_touched_files,
     parse_numstat_entries,
     parse_touched_files,
@@ -52,6 +53,37 @@ def test_list_touched_files_runs_git_log(monkeypatch, tmp_path):
     assert calls == [
         {
             "command": ["git", "log", "--name-only", "--pretty=format:commit %H"],
+            "cwd": tmp_path,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+    ]
+
+
+def test_list_numstat_entries_runs_git_log(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(command, cwd, check, capture_output, text):
+        calls.append(
+            {
+                "command": command,
+                "cwd": cwd,
+                "check": check,
+                "capture_output": capture_output,
+                "text": text,
+            }
+        )
+        return subprocess.CompletedProcess(command, 0, stdout="10\t2\tREADME.md\n")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_numstat_entries(tmp_path) == [
+        {"path": "README.md", "added": 10, "deleted": 2}
+    ]
+    assert calls == [
+        {
+            "command": ["git", "log", "--numstat", "--pretty=format:commit %H"],
             "cwd": tmp_path,
             "check": True,
             "capture_output": True,

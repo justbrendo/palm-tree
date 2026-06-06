@@ -35,6 +35,17 @@ def list_touched_files(repo: Path) -> list[str]:
     return parse_touched_files(result.stdout)
 
 
+def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
+    result = subprocess.run(
+        ["git", "log", "--numstat", "--pretty=format:commit %H"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return parse_numstat_entries(result.stdout)
+
+
 def count_touched_files(touched_files: list[str]) -> dict[str, int]:
     return dict(Counter(touched_files))
 
