@@ -1,2 +1,8 @@
 def parse_touched_files(output: str) -> list[str]:
-    return [line for line in output.splitlines() if line.strip()]
+    touched_files = []
+    for line in output.splitlines():
+        path = line.strip()
+        if not path or path.startswith("commit "):
+            continue
+        touched_files.append(path)
+    return touched_files
