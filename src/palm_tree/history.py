@@ -32,7 +32,7 @@ def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
     return [
         {"path": path, "touches": touches}
         for path, touches in sorted(
-            touch_counts.items(), key=lambda item: item[1], reverse=True
+            touch_counts.items(), key=lambda item: (-item[1], item[0])
         )
     ]
 

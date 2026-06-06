@@ -73,6 +73,20 @@ def test_rank_hotspots_orders_files_by_touch_count():
     ]
 
 
+def test_rank_hotspots_orders_ties_by_path():
+    touch_counts = {
+        "tests/test_cli.py": 2,
+        "README.md": 2,
+        "src/palm_tree/cli.py": 2,
+    }
+
+    assert rank_hotspots(touch_counts) == [
+        {"path": "README.md", "touches": 2},
+        {"path": "src/palm_tree/cli.py", "touches": 2},
+        {"path": "tests/test_cli.py", "touches": 2},
+    ]
+
+
 def test_find_hotspots_lists_counts_and_ranks_files(monkeypatch, tmp_path):
     def fake_list_touched_files(repo):
         assert repo == tmp_path
