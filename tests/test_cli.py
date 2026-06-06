@@ -69,8 +69,9 @@ def test_hotspots_command_has_repo_option():
     assert "--repo" in result.output
 
 
-def test_hotspots_command_accepts_repo_option(tmp_path):
+def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.find_hotspots", lambda repo: [])
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
 
@@ -82,3 +83,20 @@ def test_hotspots_command_rejects_non_git_directory(tmp_path):
 
     assert result.exit_code == 1
     assert "not a git repository" in result.output
+
+
+def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
+    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr(
+        "palm_tree.cli.find_hotspots",
+        lambda repo: [
+            {"path": "README.md", "touches": 3},
+            {"path": "src/palm_tree/cli.py", "touches": 1},
+        ],
+    )
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "3\tREADME.md" in result.output
+    assert "1\tsrc/palm_tree/cli.py" in result.output

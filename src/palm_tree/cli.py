@@ -2,6 +2,7 @@ from pathlib import Path
 
 import typer
 
+from palm_tree.history import find_hotspots
 from palm_tree.repository import is_git_repository
 
 
@@ -31,3 +32,6 @@ def hotspots(
     if not is_git_repository(repo):
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
+
+    for hotspot in find_hotspots(repo):
+        typer.echo(f"{hotspot['touches']}\t{hotspot['path']}")
