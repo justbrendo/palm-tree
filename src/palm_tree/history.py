@@ -1,3 +1,7 @@
+import subprocess
+from pathlib import Path
+
+
 def parse_touched_files(output: str) -> list[str]:
     touched_files = []
     for line in output.splitlines():
@@ -6,3 +10,14 @@ def parse_touched_files(output: str) -> list[str]:
             continue
         touched_files.append(path)
     return touched_files
+
+
+def list_touched_files(repo: Path) -> list[str]:
+    result = subprocess.run(
+        ["git", "log", "--name-only", "--pretty=format:commit %H"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return parse_touched_files(result.stdout)
