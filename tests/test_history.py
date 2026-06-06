@@ -2,6 +2,7 @@ import subprocess
 
 from palm_tree.history import (
     count_touched_files,
+    find_hotspots,
     list_touched_files,
     parse_touched_files,
     rank_hotspots,
@@ -68,5 +69,18 @@ def test_rank_hotspots_orders_files_by_touch_count():
     assert rank_hotspots(touch_counts) == [
         {"path": "README.md", "touches": 3},
         {"path": "tests/test_cli.py", "touches": 2},
+        {"path": "src/palm_tree/cli.py", "touches": 1},
+    ]
+
+
+def test_find_hotspots_lists_counts_and_ranks_files(monkeypatch, tmp_path):
+    def fake_list_touched_files(repo):
+        assert repo == tmp_path
+        return ["README.md", "src/palm_tree/cli.py", "README.md"]
+
+    monkeypatch.setattr("palm_tree.history.list_touched_files", fake_list_touched_files)
+
+    assert find_hotspots(tmp_path) == [
+        {"path": "README.md", "touches": 2},
         {"path": "src/palm_tree/cli.py", "touches": 1},
     ]

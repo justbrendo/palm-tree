@@ -35,3 +35,7 @@ def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
             touch_counts.items(), key=lambda item: item[1], reverse=True
         )
     ]
+
+
+def find_hotspots(repo: Path) -> list[dict[str, int | str]]:
+    return rank_hotspots(count_touched_files(list_touched_files(repo)))
