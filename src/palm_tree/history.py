@@ -92,3 +92,7 @@ def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
 
 def find_hotspots(repo: Path) -> list[dict[str, int | str]]:
     return rank_hotspots(count_touched_files(list_touched_files(repo)))
+
+
+def find_churn_hotspots(repo: Path) -> list[dict[str, int | str]]:
+    return rank_churn(aggregate_churn(list_numstat_entries(repo)))

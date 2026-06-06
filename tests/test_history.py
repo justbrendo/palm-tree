@@ -3,6 +3,7 @@ import subprocess
 from palm_tree.history import (
     aggregate_churn,
     count_touched_files,
+    find_churn_hotspots,
     find_hotspots,
     list_numstat_entries,
     list_touched_files,
@@ -168,4 +169,23 @@ def test_find_hotspots_lists_counts_and_ranks_files(monkeypatch, tmp_path):
     assert find_hotspots(tmp_path) == [
         {"path": "README.md", "touches": 2},
         {"path": "src/palm_tree/cli.py", "touches": 1},
+    ]
+
+
+def test_find_churn_hotspots_lists_aggregates_and_ranks_files(monkeypatch, tmp_path):
+    def fake_list_numstat_entries(repo):
+        assert repo == tmp_path
+        return [
+            {"path": "README.md", "added": 10, "deleted": 2},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4},
+            {"path": "README.md", "added": 3, "deleted": 1},
+        ]
+
+    monkeypatch.setattr(
+        "palm_tree.history.list_numstat_entries", fake_list_numstat_entries
+    )
+
+    assert find_churn_hotspots(tmp_path) == [
+        {"path": "README.md", "added": 13, "deleted": 3, "churn": 16},
+        {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
     ]
