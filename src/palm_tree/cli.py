@@ -34,5 +34,10 @@ def hotspots(
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
 
-    for hotspot in find_hotspots(repo)[:limit]:
+    hotspots = find_hotspots(repo)[:limit]
+    if not hotspots:
+        typer.echo("No hotspots found.")
+        return
+
+    for hotspot in hotspots:
         typer.echo(f"{hotspot['touches']}\t{hotspot['path']}")
