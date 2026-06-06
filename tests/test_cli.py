@@ -45,3 +45,10 @@ def test_info_command_reports_git_repository(tmp_path):
 
     assert result.exit_code == 0
     assert "Git repository: yes" in result.output
+
+
+def test_info_command_reports_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "Git repository: no" in result.output
