@@ -33,6 +33,8 @@ def test_info_command_has_repo_option():
 
 
 def test_info_command_accepts_repo_option(tmp_path):
+    (tmp_path / ".git").mkdir()
+
     result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
 
     assert result.exit_code == 0
@@ -47,8 +49,8 @@ def test_info_command_reports_git_repository(tmp_path):
     assert "Git repository: yes" in result.output
 
 
-def test_info_command_reports_non_git_directory(tmp_path):
+def test_info_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
 
-    assert result.exit_code == 0
-    assert "Git repository: no" in result.output
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
