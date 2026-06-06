@@ -4,6 +4,7 @@ from palm_tree.history import (
     count_touched_files,
     find_hotspots,
     list_touched_files,
+    parse_numstat_entries,
     parse_touched_files,
     rank_hotspots,
 )
@@ -19,6 +20,15 @@ def test_parse_touched_files_ignores_commit_headers_and_blanks():
     output = "\ncommit abc123\nREADME.md\n\ncommit def456\nsrc/palm_tree/cli.py\n"
 
     assert parse_touched_files(output) == ["README.md", "src/palm_tree/cli.py"]
+
+
+def test_parse_numstat_entries_from_git_output():
+    output = "\ncommit abc123\n10\t2\tREADME.md\n0\t4\tsrc/palm_tree/cli.py\n"
+
+    assert parse_numstat_entries(output) == [
+        {"path": "README.md", "added": 10, "deleted": 2},
+        {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4},
+    ]
 
 
 def test_list_touched_files_runs_git_log(monkeypatch, tmp_path):

@@ -13,6 +13,17 @@ def parse_touched_files(output: str) -> list[str]:
     return touched_files
 
 
+def parse_numstat_entries(output: str) -> list[dict[str, int | str]]:
+    entries = []
+    for line in output.splitlines():
+        row = line.strip()
+        if not row or row.startswith("commit "):
+            continue
+        added, deleted, path = row.split("\t", maxsplit=2)
+        entries.append({"path": path, "added": int(added), "deleted": int(deleted)})
+    return entries
+
+
 def list_touched_files(repo: Path) -> list[str]:
     result = subprocess.run(
         ["git", "log", "--name-only", "--pretty=format:commit %H"],
