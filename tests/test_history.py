@@ -1,6 +1,11 @@
 import subprocess
 
-from palm_tree.history import count_touched_files, list_touched_files, parse_touched_files
+from palm_tree.history import (
+    count_touched_files,
+    list_touched_files,
+    parse_touched_files,
+    rank_hotspots,
+)
 
 
 def test_parse_touched_files_from_git_output():
@@ -51,3 +56,17 @@ def test_count_touched_files_counts_each_path():
         "README.md": 2,
         "src/palm_tree/cli.py": 1,
     }
+
+
+def test_rank_hotspots_orders_files_by_touch_count():
+    touch_counts = {
+        "src/palm_tree/cli.py": 1,
+        "README.md": 3,
+        "tests/test_cli.py": 2,
+    }
+
+    assert rank_hotspots(touch_counts) == [
+        {"path": "README.md", "touches": 3},
+        {"path": "tests/test_cli.py", "touches": 2},
+        {"path": "src/palm_tree/cli.py", "touches": 1},
+    ]

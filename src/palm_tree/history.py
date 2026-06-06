@@ -26,3 +26,12 @@ def list_touched_files(repo: Path) -> list[str]:
 
 def count_touched_files(touched_files: list[str]) -> dict[str, int]:
     return dict(Counter(touched_files))
+
+
+def rank_hotspots(touch_counts: dict[str, int]) -> list[dict[str, int | str]]:
+    return [
+        {"path": path, "touches": touches}
+        for path, touches in sorted(
+            touch_counts.items(), key=lambda item: item[1], reverse=True
+        )
+    ]
