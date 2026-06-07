@@ -11,6 +11,6 @@ def is_git_repository(path: Path) -> bool:
             capture_output=True,
             text=True,
         )
-    except subprocess.CalledProcessError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         return False
     return result.stdout.strip() == "true"

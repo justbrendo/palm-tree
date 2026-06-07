@@ -24,3 +24,7 @@ def test_detects_non_git_directory(monkeypatch, tmp_path):
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     assert not is_git_repository(tmp_path)
+
+
+def test_detects_missing_path_as_non_git_repository(tmp_path):
+    assert not is_git_repository(tmp_path / "missing")
