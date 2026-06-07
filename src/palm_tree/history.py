@@ -20,6 +20,8 @@ def parse_numstat_entries(output: str) -> list[dict[str, int | str]]:
         if not row or row.startswith("commit "):
             continue
         added, deleted, path = row.split("\t", maxsplit=2)
+        if added == "-" or deleted == "-":
+            continue
         entries.append({"path": path, "added": int(added), "deleted": int(deleted)})
     return entries
 

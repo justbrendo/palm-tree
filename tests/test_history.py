@@ -35,6 +35,14 @@ def test_parse_numstat_entries_from_git_output():
     ]
 
 
+def test_parse_numstat_entries_skips_binary_files():
+    output = "10\t2\tREADME.md\n-\t-\tassets/logo.png\n"
+
+    assert parse_numstat_entries(output) == [
+        {"path": "README.md", "added": 10, "deleted": 2}
+    ]
+
+
 def test_list_touched_files_runs_git_log(monkeypatch, tmp_path):
     calls = []
 
