@@ -4,6 +4,7 @@ from palm_tree.history import (
     aggregate_churn,
     find_churn_hotspots,
     list_numstat_entries,
+    parse_commit_file_groups,
     parse_numstat_entries,
     rank_churn,
 )
@@ -23,6 +24,15 @@ def test_parse_numstat_entries_skips_binary_files():
 
     assert parse_numstat_entries(output) == [
         {"path": "README.md", "added": 10, "deleted": 2}
+    ]
+
+
+def test_parse_commit_file_groups_from_git_output():
+    output = "\ncommit abc123\nREADME.md\nsrc/palm_tree/cli.py\n\ncommit def456\nREADME.md\n"
+
+    assert parse_commit_file_groups(output) == [
+        ["README.md", "src/palm_tree/cli.py"],
+        ["README.md"],
     ]
 
 

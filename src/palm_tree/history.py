@@ -15,6 +15,25 @@ def parse_numstat_entries(output: str) -> list[dict[str, int | str]]:
     return entries
 
 
+def parse_commit_file_groups(output: str) -> list[list[str]]:
+    groups = []
+    current_group = []
+    for line in output.splitlines():
+        row = line.strip()
+        if not row:
+            continue
+        if row.startswith("commit "):
+            if current_group:
+                groups.append(current_group)
+            current_group = []
+            continue
+        current_group.append(row)
+
+    if current_group:
+        groups.append(current_group)
+    return groups
+
+
 def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
     try:
         result = subprocess.run(
