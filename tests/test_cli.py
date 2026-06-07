@@ -115,6 +115,7 @@ def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
 
     assert result.exit_code == 0
+    assert "churn\tadded\tdeleted\tpath" in result.output
     assert "12\t10\t2\tREADME.md" in result.output
     assert "4\t0\t4\tsrc/palm_tree/cli.py" in result.output
 

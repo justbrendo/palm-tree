@@ -39,6 +39,7 @@ def hotspots(
         typer.echo("No hotspots found.")
         return
 
+    typer.echo("churn\tadded\tdeleted\tpath")
     for hotspot in hotspots:
         typer.echo(
             f"{hotspot['churn']}\t{hotspot['added']}\t"
