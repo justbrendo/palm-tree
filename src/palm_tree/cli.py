@@ -58,13 +58,16 @@ def hotspots(
 @app.command()
 def cochanges(
     repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
+    limit: int = typer.Option(
+        10, "--limit", min=1, help="Maximum number of cochanges to show."
+    ),
 ):
     """Show files that tend to change together."""
     if not is_git_repository(repo):
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
 
-    cochanges = find_cochanges(repo)
+    cochanges = find_cochanges(repo)[:limit]
     if not cochanges:
         typer.echo("No cochanges found.")
         return
