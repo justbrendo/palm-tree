@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from palm_tree.history import find_churn_hotspots
+from palm_tree.history import find_churn_hotspots, find_cochanges
 from palm_tree.repository import is_git_repository
 
 
@@ -64,4 +64,7 @@ def cochanges(
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
 
-    typer.echo("No cochanges found.")
+    cochanges = find_cochanges(repo)
+    if not cochanges:
+        typer.echo("No cochanges found.")
+        return
