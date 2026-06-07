@@ -28,7 +28,9 @@ def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to
 @app.command()
 def hotspots(
     repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
-    limit: int = typer.Option(10, "--limit", help="Maximum number of hotspots to show."),
+    limit: int = typer.Option(
+        10, "--limit", min=1, help="Maximum number of hotspots to show."
+    ),
     as_json: bool = typer.Option(False, "--json", help="Print hotspots as JSON."),
 ):
     """Show files with the most repository churn."""

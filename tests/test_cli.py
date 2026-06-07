@@ -149,6 +149,13 @@ def test_hotspots_command_limits_output(monkeypatch, tmp_path):
     assert "4\t0\t4\tsrc/palm_tree/cli.py" not in result.output
 
 
+def test_hotspots_command_rejects_non_positive_limit(tmp_path):
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path), "--limit", "0"])
+
+    assert result.exit_code != 0
+    assert "Invalid value" in result.output
+
+
 def test_hotspots_command_prints_json(monkeypatch, tmp_path):
     monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr(
