@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import typer
@@ -28,6 +29,7 @@ def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to
 def hotspots(
     repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
     limit: int = typer.Option(10, "--limit", help="Maximum number of hotspots to show."),
+    as_json: bool = typer.Option(False, "--json", help="Print hotspots as JSON."),
 ):
     """Show files with the most repository churn."""
     if not is_git_repository(repo):
@@ -37,6 +39,10 @@ def hotspots(
     hotspots = find_churn_hotspots(repo)[:limit]
     if not hotspots:
         typer.echo("No hotspots found.")
+        return
+
+    if as_json:
+        typer.echo(json.dumps(hotspots))
         return
 
     typer.echo("churn\tadded\tdeleted\tpath")
