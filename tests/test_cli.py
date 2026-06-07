@@ -168,6 +168,28 @@ def test_hotspots_command_prints_json(monkeypatch, tmp_path):
     ]
 
 
+def test_hotspots_command_limits_json_output(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_churn_hotspots",
+        lambda repo: [
+            {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
+            {"path": "tests/test_cli.py", "added": 4, "deleted": 2, "churn": 6},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
+        ],
+    )
+
+    result = runner.invoke(
+        app, ["hotspots", "--repo", str(tmp_path), "--limit", "2", "--json"]
+    )
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == [
+        {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
+        {"path": "tests/test_cli.py", "added": 4, "deleted": 2, "churn": 6},
+    ]
+
+
 def test_hotspots_command_prints_empty_json(monkeypatch, tmp_path):
     monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
