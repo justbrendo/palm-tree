@@ -1,5 +1,16 @@
+import subprocess
 from pathlib import Path
 
 
 def is_git_repository(path: Path) -> bool:
-    return (path / ".git").is_dir()
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            cwd=path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return False
+    return result.stdout.strip() == "true"

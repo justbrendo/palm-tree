@@ -35,16 +35,16 @@ def test_info_command_has_repo_option():
     assert "--repo" in result.output
 
 
-def test_info_command_accepts_repo_option(tmp_path):
-    (tmp_path / ".git").mkdir()
+def test_info_command_accepts_repo_option(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
 
     result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
 
     assert result.exit_code == 0
 
 
-def test_info_command_reports_git_repository(tmp_path):
-    (tmp_path / ".git").mkdir()
+def test_info_command_reports_git_repository(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
 
     result = runner.invoke(app, ["info", "--repo", str(tmp_path)])
 
@@ -87,7 +87,7 @@ def test_hotspots_command_has_json_option():
 
 
 def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
-    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
@@ -96,7 +96,7 @@ def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
 
 
 def test_hotspots_command_reports_no_hotspots(monkeypatch, tmp_path):
-    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
@@ -113,7 +113,7 @@ def test_hotspots_command_rejects_non_git_directory(tmp_path):
 
 
 def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
-    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr(
         "palm_tree.cli.find_churn_hotspots",
         lambda repo: [
@@ -131,7 +131,7 @@ def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
 
 
 def test_hotspots_command_limits_output(monkeypatch, tmp_path):
-    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr(
         "palm_tree.cli.find_churn_hotspots",
         lambda repo: [
@@ -150,7 +150,7 @@ def test_hotspots_command_limits_output(monkeypatch, tmp_path):
 
 
 def test_hotspots_command_prints_json(monkeypatch, tmp_path):
-    (tmp_path / ".git").mkdir()
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr(
         "palm_tree.cli.find_churn_hotspots",
         lambda repo: [
