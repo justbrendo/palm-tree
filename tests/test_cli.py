@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 import typer
 from typer.testing import CliRunner
@@ -165,3 +166,28 @@ def test_hotspots_command_prints_json(monkeypatch, tmp_path):
         {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
         {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
     ]
+
+
+def test_hotspots_command_reads_real_git_history(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True)
+
+    readme = tmp_path / "README.md"
+    readme.write_text("hello\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Add readme"], cwd=tmp_path, check=True)
+
+    readme.write_text("hello\nworld\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Update readme"], cwd=tmp_path, check=True)
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "churn\tadded\tdeleted\tpath" in result.output
+    assert "2\t2\t0\tREADME.md" in result.output
