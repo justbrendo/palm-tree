@@ -63,3 +63,5 @@ def cochanges(
     if not is_git_repository(repo):
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
+
+    typer.echo("No cochanges found.")

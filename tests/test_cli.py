@@ -86,6 +86,15 @@ def test_cochanges_command_accepts_repo_option(monkeypatch, tmp_path):
     assert result.exit_code == 0
 
 
+def test_cochanges_command_reports_no_cochanges(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "No cochanges found." in result.output
+
+
 def test_cochanges_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
 
