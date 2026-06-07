@@ -189,6 +189,16 @@ def test_cochanges_command_prints_json(monkeypatch, tmp_path):
     ]
 
 
+def test_cochanges_command_prints_empty_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr("palm_tree.cli.find_cochanges", lambda repo: [])
+
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == []
+
+
 def test_cochanges_command_rejects_non_positive_limit(tmp_path):
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path), "--limit", "0"])
 
