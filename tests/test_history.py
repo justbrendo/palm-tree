@@ -3,6 +3,7 @@ import subprocess
 from palm_tree.history import (
     aggregate_churn,
     find_churn_hotspots,
+    list_commit_file_groups,
     list_numstat_entries,
     parse_commit_file_groups,
     parse_numstat_entries,
@@ -74,6 +75,48 @@ def test_list_numstat_entries_returns_empty_for_empty_history(monkeypatch, tmp_p
     monkeypatch.setattr(subprocess, "run", fake_run)
 
     assert list_numstat_entries(tmp_path) == []
+
+
+def test_list_commit_file_groups_runs_git_log(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(command, cwd, check, capture_output, text):
+        calls.append(
+            {
+                "command": command,
+                "cwd": cwd,
+                "check": check,
+                "capture_output": capture_output,
+                "text": text,
+            }
+        )
+        return subprocess.CompletedProcess(
+            command, 0, stdout="commit abc123\nREADME.md\nsrc/palm_tree/cli.py\n"
+        )
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_commit_file_groups(tmp_path) == [
+        ["README.md", "src/palm_tree/cli.py"]
+    ]
+    assert calls == [
+        {
+            "command": ["git", "log", "--name-only", "--pretty=format:commit %H"],
+            "cwd": tmp_path,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+    ]
+
+
+def test_list_commit_file_groups_returns_empty_for_empty_history(monkeypatch, tmp_path):
+    def fake_run(command, cwd, check, capture_output, text):
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_commit_file_groups(tmp_path) == []
 
 
 def test_aggregate_churn_sums_lines_by_path():

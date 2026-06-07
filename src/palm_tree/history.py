@@ -48,6 +48,20 @@ def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
     return parse_numstat_entries(result.stdout)
 
 
+def list_commit_file_groups(repo: Path) -> list[list[str]]:
+    try:
+        result = subprocess.run(
+            ["git", "log", "--name-only", "--pretty=format:commit %H"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
+    return parse_commit_file_groups(result.stdout)
+
+
 def aggregate_churn(
     entries: list[dict[str, int | str]],
 ) -> dict[str, dict[str, int]]:
