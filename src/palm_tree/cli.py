@@ -61,6 +61,7 @@ def cochanges(
     limit: int = typer.Option(
         10, "--limit", min=1, help="Maximum number of cochanges to show."
     ),
+    as_json: bool = typer.Option(False, "--json", help="Print cochanges as JSON."),
 ):
     """Show files that tend to change together."""
     if not is_git_repository(repo):
@@ -68,6 +69,10 @@ def cochanges(
         raise typer.Exit(code=1)
 
     cochanges = find_cochanges(repo)[:limit]
+    if as_json:
+        typer.echo(json.dumps(cochanges))
+        return
+
     if not cochanges:
         typer.echo("No cochanges found.")
         return
