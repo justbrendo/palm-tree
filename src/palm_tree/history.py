@@ -1,3 +1,4 @@
+from itertools import combinations
 import subprocess
 from pathlib import Path
 
@@ -75,6 +76,15 @@ def aggregate_churn(
         churn_by_path[path]["deleted"] += deleted
         churn_by_path[path]["churn"] += added + deleted
     return churn_by_path
+
+
+def count_cochange_pairs(groups: list[list[str]]) -> dict[tuple[str, str], int]:
+    pair_counts = {}
+    for group in groups:
+        for left, right in combinations(sorted(set(group)), 2):
+            pair_counts.setdefault((left, right), 0)
+            pair_counts[(left, right)] += 1
+    return pair_counts
 
 
 def rank_churn(

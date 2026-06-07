@@ -2,6 +2,7 @@ import subprocess
 
 from palm_tree.history import (
     aggregate_churn,
+    count_cochange_pairs,
     find_churn_hotspots,
     list_commit_file_groups,
     list_numstat_entries,
@@ -129,6 +130,20 @@ def test_aggregate_churn_sums_lines_by_path():
     assert aggregate_churn(entries) == {
         "README.md": {"added": 13, "deleted": 3, "churn": 16},
         "src/palm_tree/cli.py": {"added": 0, "deleted": 4, "churn": 4},
+    }
+
+
+def test_count_cochange_pairs_counts_files_changed_together():
+    groups = [
+        ["README.md", "src/palm_tree/cli.py", "tests/test_cli.py"],
+        ["tests/test_cli.py", "README.md"],
+        ["README.md"],
+    ]
+
+    assert count_cochange_pairs(groups) == {
+        ("README.md", "src/palm_tree/cli.py"): 1,
+        ("README.md", "tests/test_cli.py"): 2,
+        ("src/palm_tree/cli.py", "tests/test_cli.py"): 1,
     }
 
 
