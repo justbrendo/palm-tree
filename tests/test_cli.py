@@ -119,6 +119,24 @@ def test_cochanges_command_reads_cochanges(monkeypatch, tmp_path):
     assert calls == [tmp_path]
 
 
+def test_cochanges_command_prints_ranked_pairs(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_cochanges",
+        lambda repo: [
+            {"left": "README.md", "right": "tests/test_cli.py", "count": 2},
+            {"left": "README.md", "right": "src/palm_tree/cli.py", "count": 1},
+        ],
+    )
+
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "count\tleft\tright" in result.output
+    assert "2\tREADME.md\ttests/test_cli.py" in result.output
+    assert "1\tREADME.md\tsrc/palm_tree/cli.py" in result.output
+
+
 def test_cochanges_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
 

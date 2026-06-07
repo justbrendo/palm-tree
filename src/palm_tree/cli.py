@@ -68,3 +68,7 @@ def cochanges(
     if not cochanges:
         typer.echo("No cochanges found.")
         return
+
+    typer.echo("count\tleft\tright")
+    for cochange in cochanges:
+        typer.echo(f"{cochange['count']}\t{cochange['left']}\t{cochange['right']}")
