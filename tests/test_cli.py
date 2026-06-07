@@ -163,6 +163,13 @@ def test_cochanges_command_limits_output(monkeypatch, tmp_path):
     assert "1\tsrc/palm_tree/cli.py\ttests/test_cli.py" not in result.output
 
 
+def test_cochanges_command_rejects_non_positive_limit(tmp_path):
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path), "--limit", "0"])
+
+    assert result.exit_code != 0
+    assert "Invalid value" in result.output
+
+
 def test_cochanges_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
 
