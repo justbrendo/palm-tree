@@ -37,12 +37,12 @@ def hotspots(
         raise typer.Exit(code=1)
 
     hotspots = find_churn_hotspots(repo)[:limit]
-    if not hotspots:
-        typer.echo("No hotspots found.")
-        return
-
     if as_json:
         typer.echo(json.dumps(hotspots))
+        return
+
+    if not hotspots:
+        typer.echo("No hotspots found.")
         return
 
     typer.echo("churn\tadded\tdeleted\tpath")

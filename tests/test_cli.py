@@ -168,6 +168,16 @@ def test_hotspots_command_prints_json(monkeypatch, tmp_path):
     ]
 
 
+def test_hotspots_command_prints_empty_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == []
+
+
 def test_hotspots_command_reads_real_git_history(tmp_path):
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
