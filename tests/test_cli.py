@@ -387,3 +387,30 @@ def test_hotspots_command_reads_real_git_history(tmp_path):
     assert result.exit_code == 0
     assert "churn\tadded\tdeleted\tpath" in result.output
     assert "2\t2\t0\tREADME.md" in result.output
+
+
+def test_cochanges_command_reads_real_git_history(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True)
+
+    readme = tmp_path / "README.md"
+    cli = tmp_path / "cli.py"
+    readme.write_text("hello\n")
+    cli.write_text("print('hello')\n")
+    subprocess.run(["git", "add", "README.md", "cli.py"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Add readme and cli"], cwd=tmp_path, check=True)
+
+    readme.write_text("hello\nworld\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Update readme"], cwd=tmp_path, check=True)
+
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "count\tleft\tright" in result.output
+    assert "1\tREADME.md\tcli.py" in result.output
