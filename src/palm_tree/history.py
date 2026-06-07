@@ -87,6 +87,17 @@ def count_cochange_pairs(groups: list[list[str]]) -> dict[tuple[str, str], int]:
     return pair_counts
 
 
+def rank_cochanges(
+    pair_counts: dict[tuple[str, str], int],
+) -> list[dict[str, int | str]]:
+    return [
+        {"left": left, "right": right, "count": count}
+        for (left, right), count in sorted(
+            pair_counts.items(), key=lambda item: (-item[1], item[0][0], item[0][1])
+        )
+    ]
+
+
 def rank_churn(
     churn_by_path: dict[str, dict[str, int]],
 ) -> list[dict[str, int | str]]:

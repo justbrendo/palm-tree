@@ -8,6 +8,7 @@ from palm_tree.history import (
     list_numstat_entries,
     parse_commit_file_groups,
     parse_numstat_entries,
+    rank_cochanges,
     rank_churn,
 )
 
@@ -145,6 +146,32 @@ def test_count_cochange_pairs_counts_files_changed_together():
         ("README.md", "tests/test_cli.py"): 2,
         ("src/palm_tree/cli.py", "tests/test_cli.py"): 1,
     }
+
+
+def test_rank_cochanges_orders_pairs_by_count():
+    pair_counts = {
+        ("src/palm_tree/cli.py", "tests/test_cli.py"): 1,
+        ("README.md", "tests/test_cli.py"): 3,
+        ("README.md", "src/palm_tree/cli.py"): 3,
+    }
+
+    assert rank_cochanges(pair_counts) == [
+        {
+            "left": "README.md",
+            "right": "src/palm_tree/cli.py",
+            "count": 3,
+        },
+        {
+            "left": "README.md",
+            "right": "tests/test_cli.py",
+            "count": 3,
+        },
+        {
+            "left": "src/palm_tree/cli.py",
+            "right": "tests/test_cli.py",
+            "count": 1,
+        },
+    ]
 
 
 def test_rank_churn_orders_files_by_total_churn():
