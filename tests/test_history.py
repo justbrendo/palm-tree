@@ -103,6 +103,15 @@ def test_list_numstat_entries_runs_git_log(monkeypatch, tmp_path):
     ]
 
 
+def test_list_numstat_entries_returns_empty_for_empty_history(monkeypatch, tmp_path):
+    def fake_run(command, cwd, check, capture_output, text):
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_numstat_entries(tmp_path) == []
+
+
 def test_aggregate_churn_sums_lines_by_path():
     entries = [
         {"path": "README.md", "added": 10, "deleted": 2},

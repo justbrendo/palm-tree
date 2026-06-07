@@ -38,13 +38,16 @@ def list_touched_files(repo: Path) -> list[str]:
 
 
 def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
-    result = subprocess.run(
-        ["git", "log", "--numstat", "--pretty=format:commit %H"],
-        cwd=repo,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "log", "--numstat", "--pretty=format:commit %H"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
     return parse_numstat_entries(result.stdout)
 
 
