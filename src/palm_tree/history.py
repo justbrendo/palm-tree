@@ -116,3 +116,7 @@ def rank_churn(
 
 def find_churn_hotspots(repo: Path) -> list[dict[str, int | str]]:
     return rank_churn(aggregate_churn(list_numstat_entries(repo)))
+
+
+def find_cochanges(repo: Path) -> list[dict[str, int | str]]:
+    return rank_cochanges(count_cochange_pairs(list_commit_file_groups(repo)))

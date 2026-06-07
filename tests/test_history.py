@@ -3,6 +3,7 @@ import subprocess
 from palm_tree.history import (
     aggregate_churn,
     count_cochange_pairs,
+    find_cochanges,
     find_churn_hotspots,
     list_commit_file_groups,
     list_numstat_entries,
@@ -204,4 +205,27 @@ def test_find_churn_hotspots_lists_aggregates_and_ranks_files(monkeypatch, tmp_p
     assert find_churn_hotspots(tmp_path) == [
         {"path": "README.md", "added": 13, "deleted": 3, "churn": 16},
         {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
+    ]
+
+
+def test_find_cochanges_lists_counts_and_ranks_pairs(monkeypatch, tmp_path):
+    def fake_list_commit_file_groups(repo):
+        assert repo == tmp_path
+        return [
+            ["README.md", "src/palm_tree/cli.py", "tests/test_cli.py"],
+            ["tests/test_cli.py", "README.md"],
+        ]
+
+    monkeypatch.setattr(
+        "palm_tree.history.list_commit_file_groups", fake_list_commit_file_groups
+    )
+
+    assert find_cochanges(tmp_path) == [
+        {"left": "README.md", "right": "tests/test_cli.py", "count": 2},
+        {"left": "README.md", "right": "src/palm_tree/cli.py", "count": 1},
+        {
+            "left": "src/palm_tree/cli.py",
+            "right": "tests/test_cli.py",
+            "count": 1,
+        },
     ]
