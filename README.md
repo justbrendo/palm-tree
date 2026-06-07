@@ -24,7 +24,7 @@ palm-tree info --repo /path/to/repository
 
 The `info` command exits with an error when the target path is not a git repository.
 
-Show files touched most often in git history:
+Show files with the most git-history churn:
 
 ```bash
 palm-tree hotspots
@@ -36,4 +36,4 @@ Limit the number of hotspot rows:
 palm-tree hotspots --repo /path/to/repository --limit 5
 ```
 
-The `hotspots` command prints touch counts followed by file paths.
+The `hotspots` command prints churn, added lines, deleted lines, and file paths.
