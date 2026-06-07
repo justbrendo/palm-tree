@@ -53,3 +53,8 @@ def hotspots(
             f"{hotspot['churn']}\t{hotspot['added']}\t"
             f"{hotspot['deleted']}\t{hotspot['path']}"
         )
+
+
+@app.command()
+def cochanges():
+    """Show files that tend to change together."""

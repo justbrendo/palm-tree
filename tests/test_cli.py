@@ -65,6 +65,12 @@ def test_hotspots_command_exists():
     assert result.exit_code == 0
 
 
+def test_cochanges_command_exists():
+    result = runner.invoke(app, ["cochanges"])
+
+    assert result.exit_code == 0
+
+
 def test_hotspots_command_has_repo_option():
     result = runner.invoke(app, ["hotspots", "--help"])
 
