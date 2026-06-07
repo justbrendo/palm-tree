@@ -78,7 +78,7 @@ def test_hotspots_command_has_limit_option():
 
 def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
-    monkeypatch.setattr("palm_tree.cli.find_hotspots", lambda repo: [])
+    monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
 
@@ -87,7 +87,7 @@ def test_hotspots_command_accepts_repo_option(monkeypatch, tmp_path):
 
 def test_hotspots_command_reports_no_hotspots(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
-    monkeypatch.setattr("palm_tree.cli.find_hotspots", lambda repo: [])
+    monkeypatch.setattr("palm_tree.cli.find_churn_hotspots", lambda repo: [])
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
 
@@ -105,34 +105,34 @@ def test_hotspots_command_rejects_non_git_directory(tmp_path):
 def test_hotspots_command_prints_ranked_files(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
     monkeypatch.setattr(
-        "palm_tree.cli.find_hotspots",
+        "palm_tree.cli.find_churn_hotspots",
         lambda repo: [
-            {"path": "README.md", "touches": 3},
-            {"path": "src/palm_tree/cli.py", "touches": 1},
+            {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
         ],
     )
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
 
     assert result.exit_code == 0
-    assert "3\tREADME.md" in result.output
-    assert "1\tsrc/palm_tree/cli.py" in result.output
+    assert "12\t10\t2\tREADME.md" in result.output
+    assert "4\t0\t4\tsrc/palm_tree/cli.py" in result.output
 
 
 def test_hotspots_command_limits_output(monkeypatch, tmp_path):
     (tmp_path / ".git").mkdir()
     monkeypatch.setattr(
-        "palm_tree.cli.find_hotspots",
+        "palm_tree.cli.find_churn_hotspots",
         lambda repo: [
-            {"path": "README.md", "touches": 3},
-            {"path": "tests/test_cli.py", "touches": 2},
-            {"path": "src/palm_tree/cli.py", "touches": 1},
+            {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
+            {"path": "tests/test_cli.py", "added": 4, "deleted": 2, "churn": 6},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
         ],
     )
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path), "--limit", "2"])
 
     assert result.exit_code == 0
-    assert "3\tREADME.md" in result.output
-    assert "2\ttests/test_cli.py" in result.output
-    assert "1\tsrc/palm_tree/cli.py" not in result.output
+    assert "12\t10\t2\tREADME.md" in result.output
+    assert "6\t4\t2\ttests/test_cli.py" in result.output
+    assert "4\t0\t4\tsrc/palm_tree/cli.py" not in result.output
