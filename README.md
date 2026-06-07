@@ -45,3 +45,25 @@ palm-tree hotspots --repo /path/to/repository --json
 The `hotspots` command prints churn, added lines, deleted lines, and file paths.
 Churn is the sum of added and deleted lines. JSON output uses the same `churn`,
 `added`, `deleted`, and `path` fields.
+
+Show files that tend to change together in commits:
+
+```bash
+palm-tree cochanges
+```
+
+Limit the number of cochange rows:
+
+```bash
+palm-tree cochanges --repo /path/to/repository --limit 5
+```
+
+Print cochange rows as JSON:
+
+```bash
+palm-tree cochanges --repo /path/to/repository --json
+```
+
+The `cochanges` command prints the number of shared commits and the two file
+paths in each pair. JSON output uses the same `count`, `left`, and `right`
+fields.
