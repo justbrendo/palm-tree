@@ -36,4 +36,10 @@ Limit the number of hotspot rows:
 palm-tree hotspots --repo /path/to/repository --limit 5
 ```
 
+Print hotspot rows as JSON:
+
+```bash
+palm-tree hotspots --repo /path/to/repository --json
+```
+
 The `hotspots` command prints churn, added lines, deleted lines, and file paths.
