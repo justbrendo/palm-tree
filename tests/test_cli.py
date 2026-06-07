@@ -71,6 +71,28 @@ def test_cochanges_command_exists():
     assert result.exit_code == 0
 
 
+def test_cochanges_command_has_repo_option():
+    result = runner.invoke(app, ["cochanges", "--help"])
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_cochanges_command_accepts_repo_option(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+
+
+def test_cochanges_command_rejects_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
+
+
 def test_hotspots_command_has_repo_option():
     result = runner.invoke(app, ["hotspots", "--help"])
 
