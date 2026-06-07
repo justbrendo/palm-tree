@@ -10,6 +10,14 @@ from palm_tree.cli import app
 runner = CliRunner()
 
 
+def invoke_help(command):
+    return runner.invoke(
+        app,
+        [command, "--help"],
+        env={"COLUMNS": "120", "NO_COLOR": "1", "TERM": "dumb"},
+    )
+
+
 def test_cli_app_is_typer_app():
     assert isinstance(app, typer.Typer)
 
@@ -29,7 +37,7 @@ def test_info_command_exists():
 
 
 def test_info_command_has_repo_option():
-    result = runner.invoke(app, ["info", "--help"])
+    result = invoke_help("info")
 
     assert result.exit_code == 0
     assert "--repo" in result.output
@@ -72,7 +80,7 @@ def test_cochanges_command_exists():
 
 
 def test_cochanges_command_has_repo_option():
-    result = runner.invoke(app, ["cochanges", "--help"])
+    result = invoke_help("cochanges")
 
     assert result.exit_code == 0
     assert "--repo" in result.output
@@ -103,21 +111,21 @@ def test_cochanges_command_rejects_non_git_directory(tmp_path):
 
 
 def test_hotspots_command_has_repo_option():
-    result = runner.invoke(app, ["hotspots", "--help"])
+    result = invoke_help("hotspots")
 
     assert result.exit_code == 0
     assert "--repo" in result.output
 
 
 def test_hotspots_command_has_limit_option():
-    result = runner.invoke(app, ["hotspots", "--help"])
+    result = invoke_help("hotspots")
 
     assert result.exit_code == 0
     assert "--limit" in result.output
 
 
 def test_hotspots_command_has_json_option():
-    result = runner.invoke(app, ["hotspots", "--help"])
+    result = invoke_help("hotspots")
 
     assert result.exit_code == 0
     assert "--json" in result.output
