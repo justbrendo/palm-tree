@@ -207,6 +207,15 @@ def test_hotspots_command_prints_empty_json(monkeypatch, tmp_path):
     assert json.loads(result.output) == []
 
 
+def test_hotspots_command_handles_real_empty_git_history(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+
+    result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "No hotspots found." in result.output
+
+
 def test_hotspots_command_reads_real_git_history(tmp_path):
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
