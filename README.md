@@ -43,3 +43,5 @@ palm-tree hotspots --repo /path/to/repository --json
 ```
 
 The `hotspots` command prints churn, added lines, deleted lines, and file paths.
+Churn is the sum of added and deleted lines. JSON output uses the same `churn`,
+`added`, `deleted`, and `path` fields.
