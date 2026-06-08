@@ -369,6 +369,15 @@ def test_hotspots_command_rejects_non_positive_limit(tmp_path):
     assert "Invalid value" in result.output
 
 
+def test_hotspots_command_rejects_negative_min_churn(tmp_path):
+    result = runner.invoke(
+        app, ["hotspots", "--repo", str(tmp_path), "--min-churn", "-1"]
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid value" in result.output
+
+
 def test_hotspots_command_prints_json(monkeypatch, tmp_path):
     monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
     monkeypatch.setattr(
