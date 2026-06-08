@@ -93,6 +93,13 @@ def test_cochanges_command_has_limit_option():
     assert "--limit" in result.output
 
 
+def test_cochanges_command_has_min_count_option():
+    result = invoke_help("cochanges")
+
+    assert result.exit_code == 0
+    assert "--min-count" in result.output
+
+
 def test_cochanges_command_has_json_option():
     result = invoke_help("cochanges")
 
@@ -163,6 +170,27 @@ def test_cochanges_command_limits_output(monkeypatch, tmp_path):
     )
 
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path), "--limit", "2"])
+
+    assert result.exit_code == 0
+    assert "3\tREADME.md\ttests/test_cli.py" in result.output
+    assert "2\tREADME.md\tsrc/palm_tree/cli.py" in result.output
+    assert "1\tsrc/palm_tree/cli.py\ttests/test_cli.py" not in result.output
+
+
+def test_cochanges_command_filters_by_min_count(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_cochanges",
+        lambda repo: [
+            {"left": "README.md", "right": "tests/test_cli.py", "count": 3},
+            {"left": "README.md", "right": "src/palm_tree/cli.py", "count": 2},
+            {"left": "src/palm_tree/cli.py", "right": "tests/test_cli.py", "count": 1},
+        ],
+    )
+
+    result = runner.invoke(
+        app, ["cochanges", "--repo", str(tmp_path), "--min-count", "2"]
+    )
 
     assert result.exit_code == 0
     assert "3\tREADME.md\ttests/test_cli.py" in result.output
