@@ -58,6 +58,12 @@ Limit the number of cochange rows:
 palm-tree cochanges --repo /path/to/repository --limit 5
 ```
 
+Show only pairs that changed together at least twice:
+
+```bash
+palm-tree cochanges --repo /path/to/repository --min-count 2
+```
+
 Print cochange rows as JSON:
 
 ```bash
