@@ -264,6 +264,13 @@ def test_hotspots_command_has_limit_option():
     assert "--limit" in result.output
 
 
+def test_hotspots_command_has_min_churn_option():
+    result = invoke_help("hotspots")
+
+    assert result.exit_code == 0
+    assert "--min-churn" in result.output
+
+
 def test_hotspots_command_has_json_option():
     result = invoke_help("hotspots")
 
@@ -327,6 +334,27 @@ def test_hotspots_command_limits_output(monkeypatch, tmp_path):
     )
 
     result = runner.invoke(app, ["hotspots", "--repo", str(tmp_path), "--limit", "2"])
+
+    assert result.exit_code == 0
+    assert "12\t10\t2\tREADME.md" in result.output
+    assert "6\t4\t2\ttests/test_cli.py" in result.output
+    assert "4\t0\t4\tsrc/palm_tree/cli.py" not in result.output
+
+
+def test_hotspots_command_filters_by_min_churn(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_churn_hotspots",
+        lambda repo: [
+            {"path": "README.md", "added": 10, "deleted": 2, "churn": 12},
+            {"path": "tests/test_cli.py", "added": 4, "deleted": 2, "churn": 6},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
+        ],
+    )
+
+    result = runner.invoke(
+        app, ["hotspots", "--repo", str(tmp_path), "--min-churn", "6"]
+    )
 
     assert result.exit_code == 0
     assert "12\t10\t2\tREADME.md" in result.output

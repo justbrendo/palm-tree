@@ -31,6 +31,9 @@ def hotspots(
     limit: int = typer.Option(
         10, "--limit", min=1, help="Maximum number of hotspots to show."
     ),
+    min_churn: int = typer.Option(
+        0, "--min-churn", min=0, help="Minimum churn value to show."
+    ),
     as_json: bool = typer.Option(False, "--json", help="Print hotspots as JSON."),
 ):
     """Show files with the most repository churn."""
@@ -38,7 +41,11 @@ def hotspots(
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
         raise typer.Exit(code=1)
 
-    hotspots = find_churn_hotspots(repo)[:limit]
+    hotspots = [
+        hotspot
+        for hotspot in find_churn_hotspots(repo)
+        if int(hotspot["churn"]) >= min_churn
+    ][:limit]
     if as_json:
         typer.echo(json.dumps(hotspots))
         return
