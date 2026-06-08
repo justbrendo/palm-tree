@@ -234,6 +234,15 @@ def test_cochanges_command_rejects_non_positive_limit(tmp_path):
     assert "Invalid value" in result.output
 
 
+def test_cochanges_command_rejects_non_positive_min_count(tmp_path):
+    result = runner.invoke(
+        app, ["cochanges", "--repo", str(tmp_path), "--min-count", "0"]
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid value" in result.output
+
+
 def test_cochanges_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["cochanges", "--repo", str(tmp_path)])
 
