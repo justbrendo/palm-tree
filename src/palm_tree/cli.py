@@ -1,4 +1,5 @@
 import json
+from importlib.metadata import version as package_version
 from pathlib import Path
 
 import typer
@@ -13,6 +14,12 @@ app = typer.Typer()
 @app.callback()
 def main():
     """Mine repositories for maintenance and evolution signals."""
+
+
+@app.command()
+def version():
+    """Show the palm-tree version."""
+    typer.echo(f"palm-tree {package_version('palm-tree')}")
 
 
 @app.command()

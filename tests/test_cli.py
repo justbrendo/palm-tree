@@ -36,6 +36,21 @@ def test_info_command_exists():
     assert result.exit_code == 0
 
 
+def test_version_command_exists():
+    result = runner.invoke(app, ["version"])
+
+    assert result.exit_code == 0
+
+
+def test_version_command_prints_package_version(monkeypatch):
+    monkeypatch.setattr("palm_tree.cli.package_version", lambda name: "1.2.3")
+
+    result = runner.invoke(app, ["version"])
+
+    assert result.exit_code == 0
+    assert "palm-tree 1.2.3" in result.output
+
+
 def test_info_command_has_repo_option():
     result = invoke_help("info")
 
