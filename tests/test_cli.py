@@ -261,6 +261,23 @@ def test_authors_command_prints_json(monkeypatch, tmp_path):
     ]
 
 
+def test_authors_command_prints_empty_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr("palm_tree.cli.find_authors", lambda repo: [])
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == []
+
+
+def test_authors_command_rejects_non_positive_limit(tmp_path):
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path), "--limit", "0"])
+
+    assert result.exit_code != 0
+    assert "Invalid value" in result.output
+
+
 def test_authors_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
 
@@ -707,3 +724,28 @@ def test_summary_command_reads_real_git_history(tmp_path):
     assert "changed_files\t2" in result.output
     assert "cochange_pairs\t1" in result.output
     assert "total_churn\t3" in result.output
+
+
+def test_authors_command_reads_real_git_history(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True)
+
+    readme = tmp_path / "README.md"
+    readme.write_text("hello\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Add readme"], cwd=tmp_path, check=True)
+
+    readme.write_text("hello\nworld\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Update readme"], cwd=tmp_path, check=True)
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "commits\tname\temail" in result.output
+    assert "2\tTest User\ttest@example.com" in result.output
