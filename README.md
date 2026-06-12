@@ -36,6 +36,12 @@ Limit the number of hotspot rows:
 palm-tree hotspots --repo /path/to/repository --limit 5
 ```
 
+Show only files with churn of at least 10:
+
+```bash
+palm-tree hotspots --repo /path/to/repository --min-churn 10
+```
+
 Print hotspot rows as JSON:
 
 ```bash
