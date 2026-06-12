@@ -1,6 +1,12 @@
 from pathlib import Path
 
 
+def test_readme_documents_version_usage():
+    readme = Path("README.md").read_text()
+
+    assert "palm-tree version" in readme
+
+
 def test_readme_documents_summary_usage():
     readme = Path("README.md").read_text()
 

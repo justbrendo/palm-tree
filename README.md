@@ -24,6 +24,12 @@ palm-tree info --repo /path/to/repository
 
 The `info` command exits with an error when the target path is not a git repository.
 
+Show the installed CLI version:
+
+```bash
+palm-tree version
+```
+
 Show repository-level mining metrics:
 
 ```bash

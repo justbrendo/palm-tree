@@ -581,3 +581,33 @@ def test_cochanges_command_reads_real_git_history(tmp_path):
     assert result.exit_code == 0
     assert "count\tleft\tright" in result.output
     assert "1\tREADME.md\tcli.py" in result.output
+
+
+def test_summary_command_reads_real_git_history(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True)
+
+    readme = tmp_path / "README.md"
+    cli = tmp_path / "cli.py"
+    readme.write_text("hello\n")
+    cli.write_text("print('hello')\n")
+    subprocess.run(["git", "add", "README.md", "cli.py"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Add readme and cli"], cwd=tmp_path, check=True)
+
+    readme.write_text("hello\nworld\n")
+    subprocess.run(["git", "add", "README.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "Update readme"], cwd=tmp_path, check=True)
+
+    result = runner.invoke(app, ["summary", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "metric\tvalue" in result.output
+    assert "commits\t2" in result.output
+    assert "changed_files\t2" in result.output
+    assert "cochange_pairs\t1" in result.output
+    assert "total_churn\t3" in result.output
