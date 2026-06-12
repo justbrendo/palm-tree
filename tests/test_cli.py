@@ -67,6 +67,84 @@ def test_info_command_rejects_non_git_directory(tmp_path):
     assert "not a git repository" in result.output
 
 
+def test_summary_command_exists():
+    result = runner.invoke(app, ["summary"])
+
+    assert result.exit_code == 0
+
+
+def test_summary_command_has_repo_option():
+    result = invoke_help("summary")
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_summary_command_has_json_option():
+    result = invoke_help("summary")
+
+    assert result.exit_code == 0
+    assert "--json" in result.output
+
+
+def test_summary_command_prints_repository_summary(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_repository_summary",
+        lambda repo: {
+            "changed_files": 2,
+            "cochange_pairs": 1,
+            "commits": 3,
+            "total_added": 13,
+            "total_churn": 20,
+            "total_deleted": 7,
+        },
+    )
+
+    result = runner.invoke(app, ["summary", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "metric\tvalue" in result.output
+    assert "commits\t3" in result.output
+    assert "changed_files\t2" in result.output
+    assert "cochange_pairs\t1" in result.output
+    assert "total_churn\t20" in result.output
+
+
+def test_summary_command_prints_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_repository_summary",
+        lambda repo: {
+            "changed_files": 2,
+            "cochange_pairs": 1,
+            "commits": 3,
+            "total_added": 13,
+            "total_churn": 20,
+            "total_deleted": 7,
+        },
+    )
+
+    result = runner.invoke(app, ["summary", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == {
+        "changed_files": 2,
+        "cochange_pairs": 1,
+        "commits": 3,
+        "total_added": 13,
+        "total_churn": 20,
+        "total_deleted": 7,
+    }
+
+
+def test_summary_command_rejects_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["summary", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
+
+
 def test_hotspots_command_exists():
     result = runner.invoke(app, ["hotspots"])
 

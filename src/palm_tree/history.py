@@ -120,3 +120,19 @@ def find_churn_hotspots(repo: Path) -> list[dict[str, int | str]]:
 
 def find_cochanges(repo: Path) -> list[dict[str, int | str]]:
     return rank_cochanges(count_cochange_pairs(list_commit_file_groups(repo)))
+
+
+def find_repository_summary(repo: Path) -> dict[str, int]:
+    entries = list_numstat_entries(repo)
+    groups = list_commit_file_groups(repo)
+    churn_by_path = aggregate_churn(entries)
+    cochange_pairs = count_cochange_pairs(groups)
+
+    return {
+        "changed_files": len(churn_by_path),
+        "cochange_pairs": len(cochange_pairs),
+        "commits": len(groups),
+        "total_added": sum(int(entry["added"]) for entry in entries),
+        "total_churn": sum(totals["churn"] for totals in churn_by_path.values()),
+        "total_deleted": sum(int(entry["deleted"]) for entry in entries),
+    }

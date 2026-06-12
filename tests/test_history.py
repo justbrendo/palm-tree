@@ -5,6 +5,7 @@ from palm_tree.history import (
     count_cochange_pairs,
     find_cochanges,
     find_churn_hotspots,
+    find_repository_summary,
     list_commit_file_groups,
     list_numstat_entries,
     parse_commit_file_groups,
@@ -229,3 +230,30 @@ def test_find_cochanges_lists_counts_and_ranks_pairs(monkeypatch, tmp_path):
             "count": 1,
         },
     ]
+
+
+def test_find_repository_summary_reports_history_totals(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "palm_tree.history.list_numstat_entries",
+        lambda repo: [
+            {"path": "README.md", "added": 10, "deleted": 2},
+            {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4},
+            {"path": "README.md", "added": 3, "deleted": 1},
+        ],
+    )
+    monkeypatch.setattr(
+        "palm_tree.history.list_commit_file_groups",
+        lambda repo: [
+            ["README.md", "src/palm_tree/cli.py"],
+            ["README.md"],
+        ],
+    )
+
+    assert find_repository_summary(tmp_path) == {
+        "changed_files": 2,
+        "cochange_pairs": 1,
+        "commits": 2,
+        "total_added": 13,
+        "total_churn": 20,
+        "total_deleted": 7,
+    }

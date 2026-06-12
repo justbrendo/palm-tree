@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from palm_tree.history import find_churn_hotspots, find_cochanges
+from palm_tree.history import find_churn_hotspots, find_cochanges, find_repository_summary
 from palm_tree.repository import is_git_repository
 
 
@@ -23,6 +23,26 @@ def info(repo: Path = typer.Option(Path("."), "--repo", help="Repository path to
         raise typer.Exit(code=1)
 
     typer.echo("Git repository: yes")
+
+
+@app.command()
+def summary(
+    repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
+    as_json: bool = typer.Option(False, "--json", help="Print summary as JSON."),
+):
+    """Show repository mining summary metrics."""
+    if not is_git_repository(repo):
+        typer.echo(f"Error: {repo} is not a git repository.", err=True)
+        raise typer.Exit(code=1)
+
+    summary = find_repository_summary(repo)
+    if as_json:
+        typer.echo(json.dumps(summary))
+        return
+
+    typer.echo("metric\tvalue")
+    for metric, value in summary.items():
+        typer.echo(f"{metric}\t{value}")
 
 
 @app.command()
