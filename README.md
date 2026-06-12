@@ -24,6 +24,21 @@ palm-tree info --repo /path/to/repository
 
 The `info` command exits with an error when the target path is not a git repository.
 
+Show repository-level mining metrics:
+
+```bash
+palm-tree summary
+```
+
+Print summary metrics as JSON:
+
+```bash
+palm-tree summary --repo /path/to/repository --json
+```
+
+The `summary` command reports `commits`, `changed_files`, `cochange_pairs`,
+`total_added`, `total_deleted`, and `total_churn`.
+
 Show files with the most git-history churn:
 
 ```bash
