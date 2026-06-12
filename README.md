@@ -73,6 +73,27 @@ The `hotspots` command prints churn, added lines, deleted lines, and file paths.
 Churn is the sum of added and deleted lines. JSON output uses the same `churn`,
 `added`, `deleted`, and `path` fields.
 
+Show commit authors ranked by commit count:
+
+```bash
+palm-tree authors
+```
+
+Limit the number of author rows:
+
+```bash
+palm-tree authors --repo /path/to/repository --limit 5
+```
+
+Print author rows as JSON:
+
+```bash
+palm-tree authors --repo /path/to/repository --json
+```
+
+The `authors` command prints commit counts, author names, and author email
+addresses. JSON output uses the same `commits`, `name`, and `email` fields.
+
 Show files that tend to change together in commits:
 
 ```bash

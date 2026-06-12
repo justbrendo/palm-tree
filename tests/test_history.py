@@ -3,13 +3,17 @@ import subprocess
 from palm_tree.history import (
     aggregate_churn,
     count_cochange_pairs,
+    find_authors,
     find_cochanges,
     find_churn_hotspots,
     find_repository_summary,
+    list_author_entries,
     list_commit_file_groups,
     list_numstat_entries,
+    parse_author_entries,
     parse_commit_file_groups,
     parse_numstat_entries,
+    rank_authors,
     rank_cochanges,
     rank_churn,
 )
@@ -38,6 +42,15 @@ def test_parse_commit_file_groups_from_git_output():
     assert parse_commit_file_groups(output) == [
         ["README.md", "src/palm_tree/cli.py"],
         ["README.md"],
+    ]
+
+
+def test_parse_author_entries_from_git_output():
+    output = "Ada Lovelace\tada@example.com\nGrace Hopper\tgrace@example.com\n"
+
+    assert parse_author_entries(output) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com"},
+        {"name": "Grace Hopper", "email": "grace@example.com"},
     ]
 
 
@@ -123,6 +136,48 @@ def test_list_commit_file_groups_returns_empty_for_empty_history(monkeypatch, tm
     assert list_commit_file_groups(tmp_path) == []
 
 
+def test_list_author_entries_runs_git_log(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(command, cwd, check, capture_output, text):
+        calls.append(
+            {
+                "command": command,
+                "cwd": cwd,
+                "check": check,
+                "capture_output": capture_output,
+                "text": text,
+            }
+        )
+        return subprocess.CompletedProcess(
+            command, 0, stdout="Ada Lovelace\tada@example.com\n"
+        )
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_author_entries(tmp_path) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com"}
+    ]
+    assert calls == [
+        {
+            "command": ["git", "log", "--format=%an%x09%ae"],
+            "cwd": tmp_path,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+    ]
+
+
+def test_list_author_entries_returns_empty_for_empty_history(monkeypatch, tmp_path):
+    def fake_run(command, cwd, check, capture_output, text):
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_author_entries(tmp_path) == []
+
+
 def test_aggregate_churn_sums_lines_by_path():
     entries = [
         {"path": "README.md", "added": 10, "deleted": 2},
@@ -187,6 +242,19 @@ def test_rank_churn_orders_files_by_total_churn():
         {"path": "README.md", "added": 13, "deleted": 3, "churn": 16},
         {"path": "tests/test_cli.py", "added": 8, "deleted": 2, "churn": 10},
         {"path": "src/palm_tree/cli.py", "added": 0, "deleted": 4, "churn": 4},
+    ]
+
+
+def test_rank_authors_orders_by_commit_count():
+    entries = [
+        {"name": "Ada Lovelace", "email": "ada@example.com"},
+        {"name": "Grace Hopper", "email": "grace@example.com"},
+        {"name": "Ada Lovelace", "email": "ada@example.com"},
+    ]
+
+    assert rank_authors(entries) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
+        {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
     ]
 
 
@@ -257,3 +325,19 @@ def test_find_repository_summary_reports_history_totals(monkeypatch, tmp_path):
         "total_churn": 20,
         "total_deleted": 7,
     }
+
+
+def test_find_authors_lists_and_ranks_authors(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "palm_tree.history.list_author_entries",
+        lambda repo: [
+            {"name": "Ada Lovelace", "email": "ada@example.com"},
+            {"name": "Grace Hopper", "email": "grace@example.com"},
+            {"name": "Ada Lovelace", "email": "ada@example.com"},
+        ],
+    )
+
+    assert find_authors(tmp_path) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
+        {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
+    ]

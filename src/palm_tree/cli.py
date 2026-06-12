@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 
 from palm_tree.history import (
+    find_authors,
     find_churn_hotspots,
     find_cochanges,
     find_repository_summary,
@@ -100,6 +101,32 @@ def hotspots(
             )
             for hotspot in hotspots
         ],
+    )
+
+
+@app.command()
+def authors(
+    repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
+    limit: int = typer.Option(
+        10, "--limit", min=1, help="Maximum number of authors to show."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Print authors as JSON."),
+):
+    """Show commit authors ranked by commit count."""
+    _require_git_repository(repo)
+
+    authors = find_authors(repo)[:limit]
+    if as_json:
+        typer.echo(json.dumps(authors))
+        return
+
+    if not authors:
+        typer.echo("No authors found.")
+        return
+
+    _echo_table(
+        ("commits", "name", "email"),
+        [(author["commits"], author["name"], author["email"]) for author in authors],
     )
 
 

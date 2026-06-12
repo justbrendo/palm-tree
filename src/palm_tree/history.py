@@ -35,6 +35,17 @@ def parse_commit_file_groups(output: str) -> list[list[str]]:
     return groups
 
 
+def parse_author_entries(output: str) -> list[dict[str, str]]:
+    entries = []
+    for line in output.splitlines():
+        row = line.strip()
+        if not row:
+            continue
+        name, email = row.split("\t", maxsplit=1)
+        entries.append({"name": name, "email": email})
+    return entries
+
+
 def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
     try:
         result = subprocess.run(
@@ -61,6 +72,20 @@ def list_commit_file_groups(repo: Path) -> list[list[str]]:
     except subprocess.CalledProcessError:
         return []
     return parse_commit_file_groups(result.stdout)
+
+
+def list_author_entries(repo: Path) -> list[dict[str, str]]:
+    try:
+        result = subprocess.run(
+            ["git", "log", "--format=%an%x09%ae"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
+    return parse_author_entries(result.stdout)
 
 
 def aggregate_churn(
@@ -114,6 +139,21 @@ def rank_churn(
     ]
 
 
+def rank_authors(entries: list[dict[str, str]]) -> list[dict[str, int | str]]:
+    authors = {}
+    for entry in entries:
+        key = (entry["name"], entry["email"])
+        authors.setdefault(key, 0)
+        authors[key] += 1
+
+    return [
+        {"name": name, "email": email, "commits": commits}
+        for (name, email), commits in sorted(
+            authors.items(), key=lambda item: (-item[1], item[0][0], item[0][1])
+        )
+    ]
+
+
 def find_churn_hotspots(repo: Path) -> list[dict[str, int | str]]:
     return rank_churn(aggregate_churn(list_numstat_entries(repo)))
 
@@ -136,3 +176,7 @@ def find_repository_summary(repo: Path) -> dict[str, int]:
         "total_churn": sum(totals["churn"] for totals in churn_by_path.values()),
         "total_deleted": sum(int(entry["deleted"]) for entry in entries),
     }
+
+
+def find_authors(repo: Path) -> list[dict[str, int | str]]:
+    return rank_authors(list_author_entries(repo))

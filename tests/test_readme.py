@@ -23,6 +23,14 @@ def test_readme_documents_hotspots_usage():
     assert "palm-tree hotspots --repo /path/to/repository --json" in readme
 
 
+def test_readme_documents_authors_usage():
+    readme = Path("README.md").read_text()
+
+    assert "palm-tree authors" in readme
+    assert "palm-tree authors --repo /path/to/repository --limit 5" in readme
+    assert "palm-tree authors --repo /path/to/repository --json" in readme
+
+
 def test_readme_documents_cochanges_usage():
     readme = Path("README.md").read_text()
 

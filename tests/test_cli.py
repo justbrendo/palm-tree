@@ -172,6 +172,102 @@ def test_cochanges_command_exists():
     assert result.exit_code == 0
 
 
+def test_authors_command_exists():
+    result = runner.invoke(app, ["authors"])
+
+    assert result.exit_code == 0
+
+
+def test_authors_command_has_repo_option():
+    result = invoke_help("authors")
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_authors_command_has_limit_option():
+    result = invoke_help("authors")
+
+    assert result.exit_code == 0
+    assert "--limit" in result.output
+
+
+def test_authors_command_has_json_option():
+    result = invoke_help("authors")
+
+    assert result.exit_code == 0
+    assert "--json" in result.output
+
+
+def test_authors_command_reports_no_authors(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr("palm_tree.cli.find_authors", lambda repo: [])
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "No authors found." in result.output
+
+
+def test_authors_command_prints_ranked_authors(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_authors",
+        lambda repo: [
+            {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
+            {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
+        ],
+    )
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "commits\tname\temail" in result.output
+    assert "2\tAda Lovelace\tada@example.com" in result.output
+    assert "1\tGrace Hopper\tgrace@example.com" in result.output
+
+
+def test_authors_command_limits_output(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_authors",
+        lambda repo: [
+            {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
+            {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
+        ],
+    )
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path), "--limit", "1"])
+
+    assert result.exit_code == 0
+    assert "2\tAda Lovelace\tada@example.com" in result.output
+    assert "1\tGrace Hopper\tgrace@example.com" not in result.output
+
+
+def test_authors_command_prints_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_authors",
+        lambda repo: [
+            {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
+        ],
+    )
+
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2}
+    ]
+
+
+def test_authors_command_rejects_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
+
+
 def test_cochanges_command_has_repo_option():
     result = invoke_help("cochanges")
 
