@@ -7,6 +7,13 @@ def test_readme_documents_version_usage():
     assert "palm-tree version" in readme
 
 
+def test_readme_documents_local_checks():
+    readme = Path("README.md").read_text()
+
+    assert "python -m pytest" in readme
+    assert "python -m pip wheel . --no-deps --wheel-dir dist" in readme
+
+
 def test_readme_documents_summary_usage():
     readme = Path("README.md").read_text()
 

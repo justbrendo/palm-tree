@@ -8,6 +8,13 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
+## Run checks
+
+```bash
+python -m pytest
+python -m pip wheel . --no-deps --wheel-dir dist
+```
+
 ## Usage
 
 Show basic repository information for the current directory:
