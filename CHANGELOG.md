@@ -24,3 +24,7 @@ Initial repository-mining CLI milestone.
 - GitHub Actions test workflow for pushes and pull requests to `main`.
 - Test coverage for parser behavior, CLI output, real git repositories, README
   usage, and packaging.
+
+### Verification
+
+- Verified with pytest and wheel builds.

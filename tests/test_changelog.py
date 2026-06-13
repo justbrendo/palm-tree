@@ -13,3 +13,4 @@ def test_changelog_documents_initial_release_scope():
     assert "cochanges" in changelog
     assert "stale" in changelog
     assert "GitHub Actions" in changelog
+    assert "Verified with pytest and wheel builds" in changelog
