@@ -37,6 +37,17 @@ churn hotspots, commit authors, stale files, and co-change pairs.
 GitHub Actions runs tests and builds a wheel for pushes and pull requests to
 `main`.
 
+## Command overview
+
+| Command | Purpose |
+| --- | --- |
+| `info` | Validate and report git repository status. |
+| `summary` | Repository-level metrics. |
+| `hotspots` | Files ranked by churn. |
+| `authors` | Commit authors ranked by commit count. |
+| `stale` | Tracked files ordered by oldest last change. |
+| `cochanges` | File pairs that change together. |
+
 ## Usage
 
 Show basic repository information for the current directory:

@@ -40,6 +40,15 @@ def test_readme_documents_release_status():
     assert "GitHub Actions runs tests and builds a wheel" in readme
 
 
+def test_readme_documents_command_overview():
+    readme = Path("README.md").read_text()
+
+    assert "## Command overview" in readme
+    assert "| `summary` | Repository-level metrics. |" in readme
+    assert "| `hotspots` | Files ranked by churn. |" in readme
+    assert "| `cochanges` | File pairs that change together. |" in readme
+
+
 def test_readme_documents_summary_usage():
     readme = Path("README.md").read_text()
 
