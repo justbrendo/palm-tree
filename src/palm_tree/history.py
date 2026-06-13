@@ -46,6 +46,21 @@ def parse_author_entries(output: str) -> list[dict[str, str]]:
     return entries
 
 
+def parse_last_changed_entries(output: str) -> list[dict[str, str]]:
+    entries = []
+    current_date = None
+    for line in output.splitlines():
+        row = line.strip()
+        if not row:
+            continue
+        if row.startswith("commit "):
+            current_date = row.removeprefix("commit ")
+            continue
+        if current_date is not None:
+            entries.append({"path": row, "last_changed": current_date})
+    return entries
+
+
 def list_numstat_entries(repo: Path) -> list[dict[str, int | str]]:
     try:
         result = subprocess.run(
@@ -86,6 +101,20 @@ def list_author_entries(repo: Path) -> list[dict[str, str]]:
     except subprocess.CalledProcessError:
         return []
     return parse_author_entries(result.stdout)
+
+
+def list_last_changed_entries(repo: Path) -> list[dict[str, str]]:
+    try:
+        result = subprocess.run(
+            ["git", "log", "--name-only", "--format=commit %cI"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
+    return parse_last_changed_entries(result.stdout)
 
 
 def aggregate_churn(
@@ -154,6 +183,20 @@ def rank_authors(entries: list[dict[str, str]]) -> list[dict[str, int | str]]:
     ]
 
 
+def rank_stale_files(entries: list[dict[str, str]]) -> list[dict[str, str]]:
+    last_changed_by_path = {}
+    for entry in entries:
+        path = entry["path"]
+        last_changed_by_path.setdefault(path, entry["last_changed"])
+
+    return [
+        {"path": path, "last_changed": last_changed}
+        for path, last_changed in sorted(
+            last_changed_by_path.items(), key=lambda item: (item[1], item[0])
+        )
+    ]
+
+
 def find_churn_hotspots(repo: Path) -> list[dict[str, int | str]]:
     return rank_churn(aggregate_churn(list_numstat_entries(repo)))
 
@@ -180,3 +223,7 @@ def find_repository_summary(repo: Path) -> dict[str, int]:
 
 def find_authors(repo: Path) -> list[dict[str, int | str]]:
     return rank_authors(list_author_entries(repo))
+
+
+def find_stale_files(repo: Path) -> list[dict[str, str]]:
+    return rank_stale_files(list_last_changed_entries(repo))

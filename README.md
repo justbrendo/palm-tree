@@ -94,6 +94,27 @@ palm-tree authors --repo /path/to/repository --json
 The `authors` command prints commit counts, author names, and author email
 addresses. JSON output uses the same `commits`, `name`, and `email` fields.
 
+Show tracked files ordered by oldest last change:
+
+```bash
+palm-tree stale
+```
+
+Limit the number of stale-file rows:
+
+```bash
+palm-tree stale --repo /path/to/repository --limit 5
+```
+
+Print stale-file rows as JSON:
+
+```bash
+palm-tree stale --repo /path/to/repository --json
+```
+
+The `stale` command prints the last git commit date and file path for each
+tracked file. JSON output uses the same `last_changed` and `path` fields.
+
 Show files that tend to change together in commits:
 
 ```bash

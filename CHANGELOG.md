@@ -14,6 +14,8 @@ Initial repository-mining CLI milestone.
   `--min-churn`, and `--json` output.
 - `palm-tree authors` to rank commit authors by commit count, with `--limit`
   and `--json` output.
+- `palm-tree stale` to rank files by oldest last-change date, with `--limit`
+  and `--json` output.
 - `palm-tree cochanges` to rank file pairs that change together, with `--limit`,
   `--min-count`, and `--json` output.
 - Friendly errors for non-git repository paths.

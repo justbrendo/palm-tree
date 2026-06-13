@@ -9,4 +9,5 @@ def test_changelog_documents_initial_release_scope():
     assert "hotspots" in changelog
     assert "authors" in changelog
     assert "cochanges" in changelog
+    assert "stale" in changelog
     assert "GitHub Actions" in changelog

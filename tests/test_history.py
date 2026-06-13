@@ -7,15 +7,19 @@ from palm_tree.history import (
     find_cochanges,
     find_churn_hotspots,
     find_repository_summary,
+    find_stale_files,
     list_author_entries,
     list_commit_file_groups,
+    list_last_changed_entries,
     list_numstat_entries,
     parse_author_entries,
     parse_commit_file_groups,
+    parse_last_changed_entries,
     parse_numstat_entries,
     rank_authors,
     rank_cochanges,
     rank_churn,
+    rank_stale_files,
 )
 
 
@@ -51,6 +55,26 @@ def test_parse_author_entries_from_git_output():
     assert parse_author_entries(output) == [
         {"name": "Ada Lovelace", "email": "ada@example.com"},
         {"name": "Grace Hopper", "email": "grace@example.com"},
+    ]
+
+
+def test_parse_last_changed_entries_from_git_output():
+    output = (
+        "commit 2026-01-02T12:00:00+00:00\n"
+        "README.md\n"
+        "src/palm_tree/cli.py\n"
+        "\n"
+        "commit 2026-01-01T12:00:00+00:00\n"
+        "README.md\n"
+    )
+
+    assert parse_last_changed_entries(output) == [
+        {"path": "README.md", "last_changed": "2026-01-02T12:00:00+00:00"},
+        {
+            "path": "src/palm_tree/cli.py",
+            "last_changed": "2026-01-02T12:00:00+00:00",
+        },
+        {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
     ]
 
 
@@ -178,6 +202,48 @@ def test_list_author_entries_returns_empty_for_empty_history(monkeypatch, tmp_pa
     assert list_author_entries(tmp_path) == []
 
 
+def test_list_last_changed_entries_runs_git_log(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(command, cwd, check, capture_output, text):
+        calls.append(
+            {
+                "command": command,
+                "cwd": cwd,
+                "check": check,
+                "capture_output": capture_output,
+                "text": text,
+            }
+        )
+        return subprocess.CompletedProcess(
+            command, 0, stdout="commit 2026-01-02T12:00:00+00:00\nREADME.md\n"
+        )
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_last_changed_entries(tmp_path) == [
+        {"path": "README.md", "last_changed": "2026-01-02T12:00:00+00:00"}
+    ]
+    assert calls == [
+        {
+            "command": ["git", "log", "--name-only", "--format=commit %cI"],
+            "cwd": tmp_path,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+    ]
+
+
+def test_list_last_changed_entries_returns_empty_for_empty_history(monkeypatch, tmp_path):
+    def fake_run(command, cwd, check, capture_output, text):
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_last_changed_entries(tmp_path) == []
+
+
 def test_aggregate_churn_sums_lines_by_path():
     entries = [
         {"path": "README.md", "added": 10, "deleted": 2},
@@ -255,6 +321,24 @@ def test_rank_authors_orders_by_commit_count():
     assert rank_authors(entries) == [
         {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
         {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
+    ]
+
+
+def test_rank_stale_files_keeps_latest_change_and_orders_oldest_first():
+    entries = [
+        {"path": "README.md", "last_changed": "2026-01-03T12:00:00+00:00"},
+        {"path": "src/palm_tree/cli.py", "last_changed": "2026-01-02T12:00:00+00:00"},
+        {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+        {"path": "tests/test_cli.py", "last_changed": "2026-01-02T12:00:00+00:00"},
+    ]
+
+    assert rank_stale_files(entries) == [
+        {
+            "path": "src/palm_tree/cli.py",
+            "last_changed": "2026-01-02T12:00:00+00:00",
+        },
+        {"path": "tests/test_cli.py", "last_changed": "2026-01-02T12:00:00+00:00"},
+        {"path": "README.md", "last_changed": "2026-01-03T12:00:00+00:00"},
     ]
 
 
@@ -340,4 +424,26 @@ def test_find_authors_lists_and_ranks_authors(monkeypatch, tmp_path):
     assert find_authors(tmp_path) == [
         {"name": "Ada Lovelace", "email": "ada@example.com", "commits": 2},
         {"name": "Grace Hopper", "email": "grace@example.com", "commits": 1},
+    ]
+
+
+def test_find_stale_files_lists_and_ranks_files(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        "palm_tree.history.list_last_changed_entries",
+        lambda repo: [
+            {"path": "README.md", "last_changed": "2026-01-03T12:00:00+00:00"},
+            {
+                "path": "src/palm_tree/cli.py",
+                "last_changed": "2026-01-02T12:00:00+00:00",
+            },
+            {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+        ],
+    )
+
+    assert find_stale_files(tmp_path) == [
+        {
+            "path": "src/palm_tree/cli.py",
+            "last_changed": "2026-01-02T12:00:00+00:00",
+        },
+        {"path": "README.md", "last_changed": "2026-01-03T12:00:00+00:00"},
     ]

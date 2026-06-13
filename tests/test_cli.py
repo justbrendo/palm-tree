@@ -178,6 +178,12 @@ def test_authors_command_exists():
     assert result.exit_code == 0
 
 
+def test_stale_command_exists():
+    result = runner.invoke(app, ["stale"])
+
+    assert result.exit_code == 0
+
+
 def test_authors_command_has_repo_option():
     result = invoke_help("authors")
 
@@ -280,6 +286,102 @@ def test_authors_command_rejects_non_positive_limit(tmp_path):
 
 def test_authors_command_rejects_non_git_directory(tmp_path):
     result = runner.invoke(app, ["authors", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 1
+    assert "not a git repository" in result.output
+
+
+def test_stale_command_has_repo_option():
+    result = invoke_help("stale")
+
+    assert result.exit_code == 0
+    assert "--repo" in result.output
+
+
+def test_stale_command_has_limit_option():
+    result = invoke_help("stale")
+
+    assert result.exit_code == 0
+    assert "--limit" in result.output
+
+
+def test_stale_command_has_json_option():
+    result = invoke_help("stale")
+
+    assert result.exit_code == 0
+    assert "--json" in result.output
+
+
+def test_stale_command_reports_no_stale_files(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr("palm_tree.cli.find_stale_files", lambda repo: [])
+
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "No stale files found." in result.output
+
+
+def test_stale_command_prints_ranked_files(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_stale_files",
+        lambda repo: [
+            {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+            {"path": "src/palm_tree/cli.py", "last_changed": "2026-01-02T12:00:00+00:00"},
+        ],
+    )
+
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "last_changed\tpath" in result.output
+    assert "2026-01-01T12:00:00+00:00\tREADME.md" in result.output
+    assert "2026-01-02T12:00:00+00:00\tsrc/palm_tree/cli.py" in result.output
+
+
+def test_stale_command_limits_output(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_stale_files",
+        lambda repo: [
+            {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+            {"path": "src/palm_tree/cli.py", "last_changed": "2026-01-02T12:00:00+00:00"},
+        ],
+    )
+
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path), "--limit", "1"])
+
+    assert result.exit_code == 0
+    assert "README.md" in result.output
+    assert "src/palm_tree/cli.py" not in result.output
+
+
+def test_stale_command_prints_json(monkeypatch, tmp_path):
+    monkeypatch.setattr("palm_tree.cli.is_git_repository", lambda repo: True)
+    monkeypatch.setattr(
+        "palm_tree.cli.find_stale_files",
+        lambda repo: [
+            {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+        ],
+    )
+
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path), "--json"])
+
+    assert result.exit_code == 0
+    assert json.loads(result.output) == [
+        {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"}
+    ]
+
+
+def test_stale_command_rejects_non_positive_limit(tmp_path):
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path), "--limit", "0"])
+
+    assert result.exit_code == 2
+
+
+def test_stale_command_rejects_non_git_directory(tmp_path):
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path)])
 
     assert result.exit_code == 1
     assert "not a git repository" in result.output

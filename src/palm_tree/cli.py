@@ -9,6 +9,7 @@ from palm_tree.history import (
     find_churn_hotspots,
     find_cochanges,
     find_repository_summary,
+    find_stale_files,
 )
 from palm_tree.repository import is_git_repository
 
@@ -127,6 +128,32 @@ def authors(
     _echo_table(
         ("commits", "name", "email"),
         [(author["commits"], author["name"], author["email"]) for author in authors],
+    )
+
+
+@app.command()
+def stale(
+    repo: Path = typer.Option(Path("."), "--repo", help="Repository path to inspect."),
+    limit: int = typer.Option(
+        10, "--limit", min=1, help="Maximum number of stale files to show."
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Print stale files as JSON."),
+):
+    """Show files ordered by oldest last change."""
+    _require_git_repository(repo)
+
+    stale_files = find_stale_files(repo)[:limit]
+    if as_json:
+        typer.echo(json.dumps(stale_files))
+        return
+
+    if not stale_files:
+        typer.echo("No stale files found.")
+        return
+
+    _echo_table(
+        ("last_changed", "path"),
+        [(entry["last_changed"], entry["path"]) for entry in stale_files],
     )
 
 

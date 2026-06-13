@@ -37,3 +37,11 @@ def test_readme_documents_cochanges_usage():
     assert "palm-tree cochanges" in readme
     assert "palm-tree cochanges --repo /path/to/repository --min-count 2" in readme
     assert "palm-tree cochanges --repo /path/to/repository --json" in readme
+
+
+def test_readme_documents_stale_usage():
+    readme = Path("README.md").read_text()
+
+    assert "palm-tree stale" in readme
+    assert "palm-tree stale --repo /path/to/repository --limit 5" in readme
+    assert "palm-tree stale --repo /path/to/repository --json" in readme
