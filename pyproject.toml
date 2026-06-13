@@ -27,6 +27,9 @@ Issues = "https://github.com/justbrendo/palm-tree/issues"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+palm_tree = ["py.typed"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]

@@ -21,3 +21,12 @@ def test_project_metadata_is_release_ready():
     assert "Topic :: Software Development :: Quality Assurance" in project["classifiers"]
     assert project["urls"]["Repository"] == "https://github.com/justbrendo/palm-tree"
     assert project["urls"]["Issues"] == "https://github.com/justbrendo/palm-tree/issues"
+
+
+def test_package_exposes_type_marker():
+    pyproject = tomllib.loads(Path("pyproject.toml").read_text())
+
+    assert Path("src/palm_tree/py.typed").is_file()
+    assert pyproject["tool"]["setuptools"]["package-data"]["palm_tree"] == [
+        "py.typed"
+    ]
