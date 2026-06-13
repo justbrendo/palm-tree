@@ -12,6 +12,9 @@ def test_project_metadata_is_release_ready():
     pyproject = tomllib.loads(Path("pyproject.toml").read_text())
     project = pyproject["project"]
 
+    assert project["description"] == (
+        "CLI tools for mining git repositories for maintenance and evolution signals."
+    )
     assert project["readme"] == "README.md"
     assert project["requires-python"] == ">=3.14"
     assert project["license"] == "MIT"
