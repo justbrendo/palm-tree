@@ -32,3 +32,6 @@ jobs:
 
       - name: Run tests
         run: python -m pytest
+
+      - name: Build wheel
+        run: python -m pip wheel . --no-deps --wheel-dir dist
