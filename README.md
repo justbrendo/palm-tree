@@ -1,5 +1,19 @@
 # palm-tree
-CLI tools capable of identifying problems relevant to code maintenance and evolution
+
+CLI tools for mining git history for maintenance and evolution signals.
+`palm-tree` helps identify churn hotspots, files that change together, stale files,
+and repository-level activity metrics.
+
+## Example output
+
+```text
+$ palm-tree summary
+metric	value
+authors	2
+commits	12
+changed_files	8
+total_churn	340
+```
 
 ## Development setup
 

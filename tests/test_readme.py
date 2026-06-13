@@ -1,6 +1,23 @@
 from pathlib import Path
 
 
+def test_readme_explains_repository_mining_signals():
+    readme = Path("README.md").read_text()
+
+    assert "git history" in readme
+    assert "churn hotspots" in readme
+    assert "files that change together" in readme
+    assert "stale files" in readme
+
+
+def test_readme_shows_example_output():
+    readme = Path("README.md").read_text()
+
+    assert "## Example output" in readme
+    assert "metric\tvalue" in readme
+    assert "total_churn" in readme
+
+
 def test_readme_documents_version_usage():
     readme = Path("README.md").read_text()
 
