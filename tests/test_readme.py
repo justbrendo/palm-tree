@@ -12,6 +12,8 @@ def test_readme_documents_summary_usage():
 
     assert "palm-tree summary" in readme
     assert "palm-tree summary --repo /path/to/repository --json" in readme
+    assert "tracked_files" in readme
+    assert "authors" in readme
     assert "total_churn" in readme
 
 

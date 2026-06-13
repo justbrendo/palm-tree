@@ -42,8 +42,9 @@ Print summary metrics as JSON:
 palm-tree summary --repo /path/to/repository --json
 ```
 
-The `summary` command reports `commits`, `changed_files`, `cochange_pairs`,
-`total_added`, `total_deleted`, and `total_churn`.
+The `summary` command reports `authors`, `commits`, `changed_files`,
+`cochange_pairs`, `tracked_files`, `total_added`, `total_deleted`, and
+`total_churn`.
 
 Show files with the most git-history churn:
 

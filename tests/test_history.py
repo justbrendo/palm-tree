@@ -439,14 +439,27 @@ def test_find_repository_summary_reports_history_totals(monkeypatch, tmp_path):
             ["README.md"],
         ],
     )
+    monkeypatch.setattr(
+        "palm_tree.history.list_author_entries",
+        lambda repo: [
+            {"name": "Ada Lovelace", "email": "ada@example.com"},
+            {"name": "Ada Lovelace", "email": "ada@example.com"},
+        ],
+    )
+    monkeypatch.setattr(
+        "palm_tree.history.list_tracked_files",
+        lambda repo: {"README.md", "src/palm_tree/cli.py"},
+    )
 
     assert find_repository_summary(tmp_path) == {
+        "authors": 1,
         "changed_files": 2,
         "cochange_pairs": 1,
         "commits": 2,
         "total_added": 13,
         "total_churn": 20,
         "total_deleted": 7,
+        "tracked_files": 2,
     }
 
 

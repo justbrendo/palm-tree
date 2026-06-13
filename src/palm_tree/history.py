@@ -224,14 +224,18 @@ def find_repository_summary(repo: Path) -> dict[str, int]:
     groups = list_commit_file_groups(repo)
     churn_by_path = aggregate_churn(entries)
     cochange_pairs = count_cochange_pairs(groups)
+    authors = rank_authors(list_author_entries(repo))
+    tracked_files = list_tracked_files(repo)
 
     return {
+        "authors": len(authors),
         "changed_files": len(churn_by_path),
         "cochange_pairs": len(cochange_pairs),
         "commits": len(groups),
         "total_added": sum(int(entry["added"]) for entry in entries),
         "total_churn": sum(totals["churn"] for totals in churn_by_path.values()),
         "total_deleted": sum(int(entry["deleted"]) for entry in entries),
+        "tracked_files": len(tracked_files),
     }
 
 

@@ -107,12 +107,14 @@ def test_summary_command_prints_repository_summary(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "palm_tree.cli.find_repository_summary",
         lambda repo: {
+            "authors": 1,
             "changed_files": 2,
             "cochange_pairs": 1,
             "commits": 3,
             "total_added": 13,
             "total_churn": 20,
             "total_deleted": 7,
+            "tracked_files": 2,
         },
     )
 
@@ -120,10 +122,12 @@ def test_summary_command_prints_repository_summary(monkeypatch, tmp_path):
 
     assert result.exit_code == 0
     assert "metric\tvalue" in result.output
+    assert "authors\t1" in result.output
     assert "commits\t3" in result.output
     assert "changed_files\t2" in result.output
     assert "cochange_pairs\t1" in result.output
     assert "total_churn\t20" in result.output
+    assert "tracked_files\t2" in result.output
 
 
 def test_summary_command_prints_json(monkeypatch, tmp_path):
@@ -131,12 +135,14 @@ def test_summary_command_prints_json(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "palm_tree.cli.find_repository_summary",
         lambda repo: {
+            "authors": 1,
             "changed_files": 2,
             "cochange_pairs": 1,
             "commits": 3,
             "total_added": 13,
             "total_churn": 20,
             "total_deleted": 7,
+            "tracked_files": 2,
         },
     )
 
@@ -144,12 +150,14 @@ def test_summary_command_prints_json(monkeypatch, tmp_path):
 
     assert result.exit_code == 0
     assert json.loads(result.output) == {
+        "authors": 1,
         "changed_files": 2,
         "cochange_pairs": 1,
         "commits": 3,
         "total_added": 13,
         "total_churn": 20,
         "total_deleted": 7,
+        "tracked_files": 2,
     }
 
 
@@ -826,6 +834,8 @@ def test_summary_command_reads_real_git_history(tmp_path):
     assert "changed_files\t2" in result.output
     assert "cochange_pairs\t1" in result.output
     assert "total_churn\t3" in result.output
+    assert "authors\t1" in result.output
+    assert "tracked_files\t2" in result.output
 
 
 def test_authors_command_reads_real_git_history(tmp_path):
