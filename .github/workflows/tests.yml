@@ -28,7 +28,7 @@ jobs:
           python -m pip install -e .
 
       - name: Verify CLI install
-        run: palm-tree version
+        run: palm-tree --version
 
       - name: Run tests
         run: python -m pytest
