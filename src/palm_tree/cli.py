@@ -29,6 +29,26 @@ def _echo_table(headers: tuple[str, ...], rows: list[tuple[object, ...]]):
         typer.echo("\t".join(str(value) for value in row))
 
 
+def _echo_rows(
+    rows: list[dict[str, object]],
+    headers: tuple[str, ...],
+    empty_message: str,
+    as_json: bool,
+):
+    if as_json:
+        typer.echo(json.dumps(rows))
+        return
+
+    if not rows:
+        typer.echo(empty_message)
+        return
+
+    _echo_table(
+        headers,
+        [tuple(row[header] for header in headers) for row in rows],
+    )
+
+
 @app.callback()
 def main():
     """Mine repositories for maintenance and evolution signals."""
@@ -83,25 +103,11 @@ def hotspots(
         for hotspot in find_churn_hotspots(repo)
         if int(hotspot["churn"]) >= min_churn
     ][:limit]
-    if as_json:
-        typer.echo(json.dumps(hotspots))
-        return
-
-    if not hotspots:
-        typer.echo("No hotspots found.")
-        return
-
-    _echo_table(
+    _echo_rows(
+        hotspots,
         ("churn", "added", "deleted", "path"),
-        [
-            (
-                hotspot["churn"],
-                hotspot["added"],
-                hotspot["deleted"],
-                hotspot["path"],
-            )
-            for hotspot in hotspots
-        ],
+        "No hotspots found.",
+        as_json,
     )
 
 
@@ -117,18 +123,7 @@ def authors(
     _require_git_repository(repo)
 
     authors = find_authors(repo)[:limit]
-    if as_json:
-        typer.echo(json.dumps(authors))
-        return
-
-    if not authors:
-        typer.echo("No authors found.")
-        return
-
-    _echo_table(
-        ("commits", "name", "email"),
-        [(author["commits"], author["name"], author["email"]) for author in authors],
-    )
+    _echo_rows(authors, ("commits", "name", "email"), "No authors found.", as_json)
 
 
 @app.command()
@@ -143,17 +138,11 @@ def stale(
     _require_git_repository(repo)
 
     stale_files = find_stale_files(repo)[:limit]
-    if as_json:
-        typer.echo(json.dumps(stale_files))
-        return
-
-    if not stale_files:
-        typer.echo("No stale files found.")
-        return
-
-    _echo_table(
+    _echo_rows(
+        stale_files,
         ("last_changed", "path"),
-        [(entry["last_changed"], entry["path"]) for entry in stale_files],
+        "No stale files found.",
+        as_json,
     )
 
 
@@ -176,18 +165,4 @@ def cochanges(
         for cochange in find_cochanges(repo)
         if int(cochange["count"]) >= min_count
     ][:limit]
-    if as_json:
-        typer.echo(json.dumps(cochanges))
-        return
-
-    if not cochanges:
-        typer.echo("No cochanges found.")
-        return
-
-    _echo_table(
-        ("count", "left", "right"),
-        [
-            (cochange["count"], cochange["left"], cochange["right"])
-            for cochange in cochanges
-        ],
-    )
+    _echo_rows(cochanges, ("count", "left", "right"), "No cochanges found.", as_json)
