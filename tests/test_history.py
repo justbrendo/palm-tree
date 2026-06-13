@@ -12,6 +12,7 @@ from palm_tree.history import (
     list_commit_file_groups,
     list_last_changed_entries,
     list_numstat_entries,
+    list_tracked_files,
     parse_author_entries,
     parse_commit_file_groups,
     parse_last_changed_entries,
@@ -244,6 +245,44 @@ def test_list_last_changed_entries_returns_empty_for_empty_history(monkeypatch, 
     assert list_last_changed_entries(tmp_path) == []
 
 
+def test_list_tracked_files_runs_git_ls_files(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(command, cwd, check, capture_output, text):
+        calls.append(
+            {
+                "command": command,
+                "cwd": cwd,
+                "check": check,
+                "capture_output": capture_output,
+                "text": text,
+            }
+        )
+        return subprocess.CompletedProcess(command, 0, stdout="README.md\nsrc/cli.py\n")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_tracked_files(tmp_path) == {"README.md", "src/cli.py"}
+    assert calls == [
+        {
+            "command": ["git", "ls-files"],
+            "cwd": tmp_path,
+            "check": True,
+            "capture_output": True,
+            "text": True,
+        }
+    ]
+
+
+def test_list_tracked_files_returns_empty_for_git_error(monkeypatch, tmp_path):
+    def fake_run(command, cwd, check, capture_output, text):
+        raise subprocess.CalledProcessError(128, command)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert list_tracked_files(tmp_path) == set()
+
+
 def test_aggregate_churn_sums_lines_by_path():
     entries = [
         {"path": "README.md", "added": 10, "deleted": 2},
@@ -437,7 +476,12 @@ def test_find_stale_files_lists_and_ranks_files(monkeypatch, tmp_path):
                 "last_changed": "2026-01-02T12:00:00+00:00",
             },
             {"path": "README.md", "last_changed": "2026-01-01T12:00:00+00:00"},
+            {"path": "deleted.py", "last_changed": "2026-01-01T12:00:00+00:00"},
         ],
+    )
+    monkeypatch.setattr(
+        "palm_tree.history.list_tracked_files",
+        lambda repo: {"README.md", "src/palm_tree/cli.py"},
     )
 
     assert find_stale_files(tmp_path) == [

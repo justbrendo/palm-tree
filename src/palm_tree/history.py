@@ -117,6 +117,20 @@ def list_last_changed_entries(repo: Path) -> list[dict[str, str]]:
     return parse_last_changed_entries(result.stdout)
 
 
+def list_tracked_files(repo: Path) -> set[str]:
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return set()
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
 def aggregate_churn(
     entries: list[dict[str, int | str]],
 ) -> dict[str, dict[str, int]]:
@@ -226,4 +240,10 @@ def find_authors(repo: Path) -> list[dict[str, int | str]]:
 
 
 def find_stale_files(repo: Path) -> list[dict[str, str]]:
-    return rank_stale_files(list_last_changed_entries(repo))
+    tracked_files = list_tracked_files(repo)
+    entries = [
+        entry
+        for entry in list_last_changed_entries(repo)
+        if entry["path"] in tracked_files
+    ]
+    return rank_stale_files(entries)

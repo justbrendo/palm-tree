@@ -851,3 +851,50 @@ def test_authors_command_reads_real_git_history(tmp_path):
     assert result.exit_code == 0
     assert "commits\tname\temail" in result.output
     assert "2\tTest User\ttest@example.com" in result.output
+
+
+def test_stale_command_reads_real_git_history_and_ignores_deleted_files(tmp_path):
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True)
+
+    old_file = tmp_path / "old.py"
+    fresh_file = tmp_path / "fresh.py"
+    deleted_file = tmp_path / "deleted.py"
+    old_file.write_text("old\n")
+    deleted_file.write_text("deleted\n")
+    subprocess.run(["git", "add", "old.py", "deleted.py"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add old files"],
+        cwd=tmp_path,
+        check=True,
+        env={
+            "GIT_AUTHOR_DATE": "2026-01-01T12:00:00+00:00",
+            "GIT_COMMITTER_DATE": "2026-01-01T12:00:00+00:00",
+        },
+    )
+
+    fresh_file.write_text("fresh\n")
+    deleted_file.unlink()
+    subprocess.run(["git", "add", "fresh.py", "deleted.py"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add fresh and remove deleted"],
+        cwd=tmp_path,
+        check=True,
+        env={
+            "GIT_AUTHOR_DATE": "2026-01-02T12:00:00+00:00",
+            "GIT_COMMITTER_DATE": "2026-01-02T12:00:00+00:00",
+        },
+    )
+
+    result = runner.invoke(app, ["stale", "--repo", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert "last_changed\tpath" in result.output
+    assert "2026-01-01T12:00:00Z\told.py" in result.output
+    assert "2026-01-02T12:00:00Z\tfresh.py" in result.output
+    assert "deleted.py" not in result.output
