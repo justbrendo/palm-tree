@@ -29,6 +29,14 @@ python -m pytest
 python -m pip wheel . --no-deps --wheel-dir dist
 ```
 
+## v0.1 status
+
+Core repository-mining commands are implemented for repository summaries,
+churn hotspots, commit authors, stale files, and co-change pairs.
+
+GitHub Actions runs tests and builds a wheel for pushes and pull requests to
+`main`.
+
 ## Usage
 
 Show basic repository information for the current directory:

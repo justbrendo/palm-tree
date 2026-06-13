@@ -32,6 +32,14 @@ def test_readme_documents_local_checks():
     assert "python -m pip wheel . --no-deps --wheel-dir dist" in readme
 
 
+def test_readme_documents_release_status():
+    readme = Path("README.md").read_text()
+
+    assert "## v0.1 status" in readme
+    assert "Core repository-mining commands are implemented" in readme
+    assert "GitHub Actions runs tests and builds a wheel" in readme
+
+
 def test_readme_documents_summary_usage():
     readme = Path("README.md").read_text()
 
