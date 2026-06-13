@@ -41,6 +41,14 @@ def test_parse_numstat_entries_skips_binary_files():
     ]
 
 
+def test_parse_numstat_entries_skips_malformed_rows():
+    output = "10\t2\tREADME.md\nnot-a-numstat-row\n1\tmissing-path\n"
+
+    assert parse_numstat_entries(output) == [
+        {"path": "README.md", "added": 10, "deleted": 2}
+    ]
+
+
 def test_parse_commit_file_groups_from_git_output():
     output = "\ncommit abc123\nREADME.md\nsrc/palm_tree/cli.py\n\ncommit def456\nREADME.md\n"
 
@@ -56,6 +64,14 @@ def test_parse_author_entries_from_git_output():
     assert parse_author_entries(output) == [
         {"name": "Ada Lovelace", "email": "ada@example.com"},
         {"name": "Grace Hopper", "email": "grace@example.com"},
+    ]
+
+
+def test_parse_author_entries_skips_malformed_rows():
+    output = "Ada Lovelace\tada@example.com\nmissing-email\n\t\n"
+
+    assert parse_author_entries(output) == [
+        {"name": "Ada Lovelace", "email": "ada@example.com"},
     ]
 
 

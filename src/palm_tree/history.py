@@ -9,10 +9,16 @@ def parse_numstat_entries(output: str) -> list[dict[str, int | str]]:
         row = line.strip()
         if not row or row.startswith("commit "):
             continue
-        added, deleted, path = row.split("\t", maxsplit=2)
+        parts = row.split("\t", maxsplit=2)
+        if len(parts) != 3:
+            continue
+        added, deleted, path = parts
         if added == "-" or deleted == "-":
             continue
-        entries.append({"path": path, "added": int(added), "deleted": int(deleted)})
+        try:
+            entries.append({"path": path, "added": int(added), "deleted": int(deleted)})
+        except ValueError:
+            continue
     return entries
 
 
@@ -41,7 +47,12 @@ def parse_author_entries(output: str) -> list[dict[str, str]]:
         row = line.strip()
         if not row:
             continue
-        name, email = row.split("\t", maxsplit=1)
+        parts = row.split("\t", maxsplit=1)
+        if len(parts) != 2:
+            continue
+        name, email = parts
+        if not name or not email:
+            continue
         entries.append({"name": name, "email": email})
     return entries
 
