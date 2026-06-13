@@ -51,6 +51,26 @@ def test_version_command_prints_package_version(monkeypatch):
     assert "palm-tree 1.2.3" in result.output
 
 
+def test_version_option_prints_package_version(monkeypatch):
+    monkeypatch.setattr("palm_tree.cli.package_version", lambda name: "1.2.3")
+
+    result = runner.invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert result.output == "palm-tree 1.2.3\n"
+
+
+def test_cli_help_shows_version_option():
+    result = runner.invoke(
+        app,
+        ["--help"],
+        env={"COLUMNS": "120", "NO_COLOR": "1", "TERM": "dumb"},
+    )
+
+    assert result.exit_code == 0
+    assert "--version" in result.output
+
+
 def test_info_command_has_repo_option():
     result = invoke_help("info")
 

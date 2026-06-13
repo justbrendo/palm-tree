@@ -7,7 +7,8 @@ Initial repository-mining CLI milestone.
 ### Added
 
 - `palm-tree info` to validate and report git repository status.
-- `palm-tree version` to show the installed package version.
+- `palm-tree --version` and `palm-tree version` to show the installed package
+  version.
 - `palm-tree summary` for repository-level metrics: authors, commits, changed
   files, tracked files, cochange pairs, added lines, deleted lines, and total
   churn.

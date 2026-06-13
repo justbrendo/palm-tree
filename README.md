@@ -34,6 +34,7 @@ The `info` command exits with an error when the target path is not a git reposit
 Show the installed CLI version:
 
 ```bash
+palm-tree --version
 palm-tree version
 ```
 

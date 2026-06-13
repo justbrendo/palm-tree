@@ -17,6 +17,16 @@ from palm_tree.repository import is_git_repository
 app = typer.Typer()
 
 
+def _echo_version():
+    typer.echo(f"palm-tree {package_version('palm-tree')}")
+
+
+def _version_callback(value: bool):
+    if value:
+        _echo_version()
+        raise typer.Exit()
+
+
 def _require_git_repository(repo: Path):
     if not is_git_repository(repo):
         typer.echo(f"Error: {repo} is not a git repository.", err=True)
@@ -50,14 +60,22 @@ def _echo_rows(
 
 
 @app.callback()
-def main():
+def main(
+    version_option: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        help="Show the palm-tree version and exit.",
+        is_eager=True,
+    ),
+):
     """Mine repositories for maintenance and evolution signals."""
 
 
 @app.command()
 def version():
     """Show the palm-tree version."""
-    typer.echo(f"palm-tree {package_version('palm-tree')}")
+    _echo_version()
 
 
 @app.command()
