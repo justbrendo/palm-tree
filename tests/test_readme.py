@@ -10,6 +10,23 @@ def test_readme_explains_repository_mining_signals():
     assert "stale files" in readme
 
 
+def test_readme_documents_group_members():
+    readme = Path("README.md").read_text()
+
+    assert "## Group members" in readme
+    assert "Brendo Gético Eugênio" in readme
+
+
+def test_readme_documents_technology_stack():
+    readme = Path("README.md").read_text()
+
+    assert "## Technology stack" in readme
+    assert "Python 3.14" in readme
+    assert "Typer" in readme
+    assert "pytest" in readme
+    assert "GitHub Actions" in readme
+
+
 def test_readme_shows_example_output():
     readme = Path("README.md").read_text()
 

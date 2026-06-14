@@ -4,6 +4,19 @@ CLI tools for mining git history for maintenance and evolution signals.
 `palm-tree` helps identify churn hotspots, files that change together, stale files,
 and repository-level activity metrics.
 
+## Group members
+
+- Brendo Gético Eugênio
+
+## Technology stack
+
+- Python 3.14 for the CLI and repository-mining logic.
+- Typer for command-line interface structure.
+- pytest for automated tests.
+- Git and subprocess-based repository mining.
+- GitHub Actions for continuous integration.
+- setuptools for packaging and console script configuration.
+
 ## Example output
 
 ```text
