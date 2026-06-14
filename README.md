@@ -7,6 +7,7 @@ and repository-level activity metrics.
 ## Group members
 
 - Brendo Gético Eugênio
+- Thales Augusto Rocha Fernandes
 
 ## Technology stack
 
