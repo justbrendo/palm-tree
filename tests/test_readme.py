@@ -27,6 +27,15 @@ def test_readme_documents_technology_stack():
     assert "GitHub Actions" in readme
 
 
+def test_readme_documents_generative_ai_use():
+    readme = Path("README.md").read_text()
+
+    assert "## Generative AI use" in readme
+    assert "AI coding agents" in readme
+    assert "human instructions" in readme
+    assert "reviewed, tested, and committed" in readme
+
+
 def test_readme_shows_example_output():
     readme = Path("README.md").read_text()
 

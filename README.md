@@ -17,6 +17,13 @@ and repository-level activity metrics.
 - GitHub Actions for continuous integration.
 - setuptools for packaging and console script configuration.
 
+## Generative AI use
+
+Generative AI coding agents were used during this project to write code,
+tests, documentation, and repository updates directed by human instructions.
+The development process remained human-led.
+Requested changes were reviewed, tested, and committed in small increments.
+
 ## Example output
 
 ```text
